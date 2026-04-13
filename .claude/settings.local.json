@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs grep:*)",
+      "Bash(node:*)",
+      "Bash(npx prisma:*)",
+      "Bash(node_modules/.bin/prisma migrate:*)",
+      "Bash(npx:*)",
+      "Bash(npm:*)"
+    ]
+  }
+}

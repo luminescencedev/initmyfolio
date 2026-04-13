@@ -1,0 +1,12 @@
+{
+  "name": "@initmyfolio/config",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./typescript": "./typescript/index.json",
+    "./eslint": "./eslint/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
