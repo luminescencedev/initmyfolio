@@ -33,18 +33,36 @@ export interface PortfolioUser {
     totalForks: number;
   };
   settings: {
+    // Existants
     theme?: "dark" | "light" | "auto";
     pinnedRepos?: string[];
     customLinks?: Array<{ label: string; url: string; icon?: string }>;
-    hideSections?: Array<"stats" | "languages" | "repos">;
+    hideSections?: string[];
     showEmail?: boolean;
+    // Apparence
+    accentColor?: "red" | "cyan" | "emerald" | "amber" | "rose" | "sky";
+    fontStyle?: "mono" | "display" | "mixed";
+    layoutVariant?: "brutalist" | "terminal" | "minimal";
+    heroStyle?: "name-full" | "name-initials" | "name-split";
+    showAvatar?: boolean;
+    // Contenu
+    sectionOrder?: string[];
+    repoDisplayStyle?: "table" | "cards" | "compact";
+    maxRepos?: 4 | 6 | 8 | 12;
+    repoSortBy?: "stars" | "forks" | "updated" | "pinned-first";
+    showTopics?: boolean;
+    // Sections personnalisées
+    aboutText?: string;
+    techStack?: Array<{ name: string; category?: string }>;
+    availability?: "open" | "busy" | "closed" | null;
+    featuredRepo?: string | null;
   };
   lastSyncedAt: string | null;
   createdAt: string;
 }
 
 export async function getPortfolioUser(
-  username: string
+  username: string,
 ): Promise<PortfolioUser | null> {
   try {
     const res = await fetch(`${API_URL}/api/users/${username}`, {
@@ -64,7 +82,9 @@ export async function getPortfolioUser(
   }
 }
 
-export async function getCurrentUser(token: string): Promise<PortfolioUser | null> {
+export async function getCurrentUser(
+  token: string,
+): Promise<PortfolioUser | null> {
   try {
     const res = await fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -82,7 +102,7 @@ export async function getCurrentUser(token: string): Promise<PortfolioUser | nul
 export async function updateSettings(
   token: string,
   username: string,
-  settings: Partial<PortfolioUser["settings"]>
+  settings: Partial<PortfolioUser["settings"]>,
 ): Promise<boolean> {
   try {
     const res = await fetch(`${API_URL}/api/users/${username}/settings`, {
@@ -106,7 +126,10 @@ export interface SyncResult {
   availableAt?: Date;
 }
 
-export async function triggerSync(token: string, username: string): Promise<SyncResult> {
+export async function triggerSync(
+  token: string,
+  username: string,
+): Promise<SyncResult> {
   try {
     const res = await fetch(`${API_URL}/api/sync/${username}`, {
       method: "POST",
@@ -114,7 +137,10 @@ export async function triggerSync(token: string, username: string): Promise<Sync
     });
     if (res.ok) return { ok: true };
     if (res.status === 429) {
-      const body = await res.json() as { retryAfter?: number; availableAt?: string };
+      const body = (await res.json()) as {
+        retryAfter?: number;
+        availableAt?: string;
+      };
       return {
         ok: false,
         rateLimited: true,

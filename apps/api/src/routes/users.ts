@@ -37,7 +37,7 @@ usersRouter.get(
     }
 
     return c.json({ user });
-  }
+  },
 );
 
 // Authenticated: Update portfolio settings
@@ -45,6 +45,7 @@ const settingsSchema = z.object({
   displayName: z.string().max(100).optional(),
   bio: z.string().max(500).optional(),
   website: z.string().url().optional().or(z.literal("")),
+  // Existants
   theme: z.enum(["dark", "light", "auto"]).optional(),
   showEmail: z.boolean().optional(),
   pinnedRepos: z.array(z.string()).max(6).optional(),
@@ -54,11 +55,40 @@ const settingsSchema = z.object({
         label: z.string().max(50),
         url: z.string().url(),
         icon: z.string().optional(),
-      })
+      }),
     )
     .max(10)
     .optional(),
-  hideSections: z.array(z.enum(["stats", "languages", "repos"])).optional(),
+  hideSections: z.array(z.string()).max(10).optional(),
+  // Apparence
+  accentColor: z
+    .enum(["red", "cyan", "emerald", "amber", "rose", "sky"])
+    .optional(),
+  fontStyle: z.enum(["mono", "display", "mixed"]).optional(),
+  layoutVariant: z.enum(["brutalist", "terminal", "minimal"]).optional(),
+  heroStyle: z.enum(["name-full", "name-initials", "name-split"]).optional(),
+  showAvatar: z.boolean().optional(),
+  // Contenu
+  sectionOrder: z.array(z.string()).max(10).optional(),
+  repoDisplayStyle: z.enum(["table", "cards", "compact"]).optional(),
+  maxRepos: z
+    .union([z.literal(4), z.literal(6), z.literal(8), z.literal(12)])
+    .optional(),
+  repoSortBy: z.enum(["stars", "forks", "updated", "pinned-first"]).optional(),
+  showTopics: z.boolean().optional(),
+  // Sections personnalisées
+  aboutText: z.string().max(1000).optional(),
+  techStack: z
+    .array(
+      z.object({
+        name: z.string().max(40),
+        category: z.string().max(40).optional(),
+      }),
+    )
+    .max(30)
+    .optional(),
+  availability: z.enum(["open", "busy", "closed"]).nullable().optional(),
+  featuredRepo: z.string().max(100).nullable().optional(),
 });
 
 usersRouter.put(
@@ -97,5 +127,5 @@ usersRouter.put(
     });
 
     return c.json({ user });
-  }
+  },
 );
