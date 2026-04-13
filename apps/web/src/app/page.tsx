@@ -316,7 +316,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── TECH FEATURES (asymmetric bento, not 3-col) ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid md:grid-cols-3 gap-0 border border-border">
           <div className="md:col-span-2 p-8 border-b md:border-b-0 md:border-r border-border">
             <div className="label mb-4">[ ARCHITECTURE ]</div>
@@ -358,7 +358,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────── */}
-      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-20">
         <div className="border-b border-border pb-6 mb-10">
           <div className="label mb-2">[ 02 / PLANS ]</div>
           <h2 className="font-display uppercase tracking-tighter text-foreground" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
