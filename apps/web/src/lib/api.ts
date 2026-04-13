@@ -42,7 +42,7 @@ export interface PortfolioUser {
     // Apparence
     accentColor?: "red" | "cyan" | "emerald" | "amber" | "rose" | "sky";
     fontStyle?: "mono" | "display" | "mixed";
-    layoutVariant?: "brutalist" | "terminal" | "minimal";
+    layoutVariant?: "brutalist" | "glass" | "clean" | "editorial";
     heroStyle?: "name-full" | "name-initials" | "name-split";
     showAvatar?: boolean;
     // Contenu

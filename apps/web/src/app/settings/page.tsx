@@ -23,47 +23,33 @@ import { ThemeToggle } from "@/components/theme-toggle";
 type UserSettings = PortfolioUser["settings"];
 
 /* ── Constants ─────────────────────────────────────────── */
-const ACCENT_OPTIONS = [
-  "red",
-  "cyan",
-  "emerald",
-  "amber",
-  "rose",
-  "sky",
-] as const;
-const ACCENT_CLASSES: Record<string, string> = {
-  red: "bg-[hsl(0_80%_50%)]",
-  cyan: "bg-[hsl(188_85%_48%)]",
-  emerald: "bg-[hsl(152_60%_42%)]",
-  amber: "bg-[hsl(38_90%_50%)]",
-  rose: "bg-[hsl(347_77%_50%)]",
-  sky: "bg-[hsl(200_85%_50%)]",
+const ACCENT_OPTIONS = ["red", "cyan", "emerald", "amber", "rose", "sky"] as const;
+const ACCENT_COLORS: Record<string, { bg: string; label: string }> = {
+  red:     { bg: "hsl(0 80% 50%)",    label: "Red" },
+  cyan:    { bg: "hsl(188 85% 48%)",  label: "Cyan" },
+  emerald: { bg: "hsl(152 60% 42%)",  label: "Emerald" },
+  amber:   { bg: "hsl(38 90% 50%)",   label: "Amber" },
+  rose:    { bg: "hsl(347 77% 50%)",  label: "Rose" },
+  sky:     { bg: "hsl(200 85% 50%)",  label: "Sky" },
 };
 const SECTION_LABELS: Record<string, string> = {
-  stats: "STATS",
-  repos: "REPOSITORIES",
-  languages: "LANGUAGES",
-  about: "ABOUT",
-  stack: "TECH STACK",
-  links: "CUSTOM LINKS",
+  stats: "Stats", repos: "Repositories", languages: "Languages",
+  about: "About", stack: "Tech Stack", links: "Custom Links",
 };
 const ALL_SECTIONS = ["stats", "repos", "languages", "about", "stack", "links"];
 const NAV_SECTIONS = [
-  { id: "appearance", label: "APPEARANCE" },
-  { id: "content", label: "CONTENT" },
-  { id: "about", label: "ABOUT" },
-  { id: "stack", label: "TECH STACK" },
-  { id: "featured", label: "FEATURED REPO" },
-  { id: "sections", label: "SECTIONS & ORDER" },
-  { id: "links", label: "CUSTOM LINKS" },
+  { id: "appearance", label: "Appearance" },
+  { id: "content",    label: "Content" },
+  { id: "about",      label: "About text" },
+  { id: "stack",      label: "Tech stack" },
+  { id: "featured",   label: "Featured repo" },
+  { id: "sections",   label: "Sections & order" },
+  { id: "links",      label: "Custom links" },
 ] as const;
 
-/* ── Generic option group ──────────────────────────────── */
+/* ── Option group ────────────────────────────────────────── */
 function OptionGroup<T extends string | number>({
-  value,
-  options,
-  labels,
-  onChange,
+  value, options, labels, onChange,
 }: {
   value: T | undefined;
   options: readonly T[];
@@ -71,16 +57,16 @@ function OptionGroup<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1">
-      {options.map((opt) => (
+    <div className="flex flex-wrap gap-2">
+      {options.map(opt => (
         <button
           key={String(opt)}
           type="button"
           onClick={() => onChange(opt)}
-          className={`px-2.5 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
+          className={`px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
             value === opt
-              ? "border-foreground text-foreground bg-muted"
-              : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+              ? "border-foreground bg-foreground text-background shadow-sm"
+              : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground hover:bg-secondary"
           }`}
         >
           {labels?.[String(opt)] ?? String(opt)}
@@ -90,150 +76,90 @@ function OptionGroup<T extends string | number>({
   );
 }
 
-/* ── Toggle button ─────────────────────────────────────── */
-function Toggle({
-  value,
-  onChange,
-  label,
-}: {
-  value: boolean | undefined;
-  onChange: (v: boolean) => void;
-  label: string;
-}) {
+/* ── Toggle ──────────────────────────────────────────────── */
+function Toggle({ value, onChange, label }: { value: boolean | undefined; onChange: (v: boolean) => void; label: string }) {
   const active = value ?? false;
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-      <span className="label">{label}</span>
+    <div className="flex items-center justify-between py-3">
+      <span className="text-sm text-foreground">{label}</span>
       <button
         type="button"
         onClick={() => onChange(!active)}
-        className={`px-3 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
-          active
-            ? "border-foreground bg-foreground text-background"
-            : "border-border text-muted-foreground hover:border-foreground"
-        }`}
+        className={`relative w-10 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${active ? "bg-primary" : "bg-secondary border border-border"}`}
       >
-        {active ? "ON" : "OFF"}
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${active ? "translate-x-4" : "translate-x-0"}`} />
       </button>
     </div>
   );
 }
 
-/* ── Section row (order + visibility) ─────────────────── */
-function SectionRow({
-  id,
-  label,
-  hidden,
-  isFirst,
-  isLast,
-  onToggle,
-  onMoveUp,
-  onMoveDown,
-}: {
-  id: string;
-  label: string;
-  hidden: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-  onToggle: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
+/* ── Section row (order + visibility) ───────────────────── */
+function SectionRow({ id, label, hidden, isFirst, isLast, onToggle, onMoveUp, onMoveDown }: {
+  id: string; label: string; hidden: boolean;
+  isFirst: boolean; isLast: boolean;
+  onToggle: () => void; onMoveUp: () => void; onMoveDown: () => void;
 }) {
   return (
-    <div
-      className={`flex items-center gap-2 px-4 py-2.5 border-b border-border last:border-0 ${hidden ? "opacity-40" : ""}`}
-    >
+    <div className={`flex items-center gap-3 py-3 transition-opacity ${hidden ? "opacity-40" : ""}`}>
       <div className="flex flex-col gap-0.5">
-        <button
-          type="button"
-          disabled={isFirst}
-          onClick={onMoveUp}
-          className="w-5 h-4 flex items-center justify-center border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-        >
+        <button type="button" disabled={isFirst} onClick={onMoveUp}
+          className="w-6 h-5 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-20 disabled:cursor-not-allowed">
           <ArrowUp weight="bold" className="w-2.5 h-2.5" />
         </button>
-        <button
-          type="button"
-          disabled={isLast}
-          onClick={onMoveDown}
-          className="w-5 h-4 flex items-center justify-center border border-border text-muted-foreground hover:text-foreground hover:border-foreground transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-        >
+        <button type="button" disabled={isLast} onClick={onMoveDown}
+          className="w-6 h-5 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-20 disabled:cursor-not-allowed">
           <ArrowDown weight="bold" className="w-2.5 h-2.5" />
         </button>
       </div>
-      <span className="flex-1 label text-foreground">{label}</span>
+      <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
       <button
-        type="button"
-        onClick={onToggle}
-        className={`flex items-center gap-1.5 px-2 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
+        type="button" onClick={onToggle}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all duration-150 active:scale-[0.97] ${
           hidden
-            ? "border-border text-muted-foreground hover:border-foreground"
+            ? "border-border text-muted-foreground hover:border-foreground/50 hover:bg-secondary"
             : "border-foreground bg-foreground text-background"
         }`}
       >
-        {hidden ? (
-          <>
-            <EyeSlash weight="bold" className="w-3 h-3" /> HIDDEN
-          </>
-        ) : (
-          <>
-            <Eye weight="bold" className="w-3 h-3" /> VISIBLE
-          </>
-        )}
+        {hidden
+          ? <><EyeSlash weight="bold" className="w-3 h-3" /> Hidden</>
+          : <><Eye weight="bold" className="w-3 h-3" /> Visible</>
+        }
       </button>
     </div>
   );
 }
 
-/* ── Tech stack tag input ──────────────────────────────── */
-function TechStackInput({
-  value,
-  onChange,
-}: {
+/* ── Tech stack tag input ────────────────────────────────── */
+function TechStackInput({ value, onChange }: {
   value: Array<{ name: string; category?: string }>;
   onChange: (v: Array<{ name: string; category?: string }>) => void;
 }) {
   const [input, setInput] = useState("");
   const addTag = () => {
     const t = input.trim().replace(/,$/, "").trim();
-    if (!t || value.some((x) => x.name.toLowerCase() === t.toLowerCase())) {
-      setInput("");
-      return;
-    }
-    onChange([...value, { name: t.toUpperCase() }]);
+    if (!t || value.some(x => x.name.toLowerCase() === t.toLowerCase())) { setInput(""); return; }
+    onChange([...value, { name: t }]);
     setInput("");
   };
   const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag();
-    }
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(); }
   };
   return (
     <div className="space-y-3">
       <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKey}
-        onBlur={addTag}
-        placeholder="ADD TECH… (ENTER OR ,)"
-        className="w-full px-3 py-2 border border-border bg-background font-mono text-xs uppercase tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
+        type="text" value={input} onChange={e => setInput(e.target.value)}
+        onKeyDown={handleKey} onBlur={addTag}
+        placeholder="Add technology… (Enter or ,)"
+        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
       />
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {value.map((tag, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1 border border-border font-mono text-[10px] px-2 py-0.5 text-foreground"
-            >
+            <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-secondary text-sm font-medium text-foreground">
               {tag.name}
-              <button
-                type="button"
-                onClick={() => onChange(value.filter((_, j) => j !== i))}
-                className="text-muted-foreground hover:text-foreground transition-colors ml-0.5"
-              >
-                <X weight="bold" className="w-2.5 h-2.5" />
+              <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))}
+                className="text-muted-foreground hover:text-foreground transition-colors ml-0.5">
+                <X weight="bold" className="w-3 h-3" />
               </button>
             </span>
           ))}
@@ -243,80 +169,59 @@ function TechStackInput({
   );
 }
 
-/* ── Section header ────────────────────────────────────── */
+/* ── Section header ──────────────────────────────────────── */
 function SectionHeader({ id, label }: { id: string; label: string }) {
   return (
-    <div
-      id={id}
-      className="border-b border-border px-6 py-2.5 bg-background sticky top-[48px] z-10"
-    >
-      <span className="label text-[9px] tracking-widest">{label}</span>
+    <div id={id} className="sticky top-16 z-10 -mx-6 px-6 py-3 bg-background/90 backdrop-blur-sm border-b border-border/60">
+      <h2 className="text-sm font-semibold text-foreground">{label}</h2>
     </div>
   );
 }
 
-function FieldBlock({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+/* ── Field block ─────────────────────────────────────────── */
+function FieldBlock({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="px-6 py-4 border-b border-border">
-      <div className="label mb-2 text-muted-foreground">{label}</div>
+    <div className="py-5 border-b border-border/60 last:border-0">
+      <div className="text-sm font-medium text-foreground mb-1">{label}</div>
+      {hint && <div className="text-xs text-muted-foreground mb-3">{hint}</div>}
       {children}
     </div>
   );
 }
 
-/* ── Main settings form ────────────────────────────────── */
+/* ── Main settings form ──────────────────────────────────── */
 function SettingsContent() {
   const [user, setUser] = useState<PortfolioUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const [local, setLocal] = useState<UserSettings>({});
   const [isDirty, setIsDirty] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [activeSection, setActiveSection] = useState("appearance");
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialSettings = useRef<UserSettings>({});
 
-  /* ── Auth ── */
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
-    if (!storedToken) {
-      router.push("/login");
-      return;
-    }
+    if (!storedToken) { router.push("/login"); return; }
     setToken(storedToken);
-    getCurrentUser(storedToken).then((u) => {
+    getCurrentUser(storedToken).then(u => {
       setLoading(false);
-      if (!u) {
-        localStorage.removeItem("auth_token");
-        router.push("/login");
-        return;
-      }
+      if (!u) { localStorage.removeItem("auth_token"); router.push("/login"); return; }
       setUser(u);
       setLocal(u.settings ?? {});
       initialSettings.current = u.settings ?? {};
     });
   }, [router, searchParams]);
 
-  /* ── Dirty tracking ── */
   useEffect(() => {
-    setIsDirty(
-      JSON.stringify(local) !== JSON.stringify(initialSettings.current),
-    );
+    setIsDirty(JSON.stringify(local) !== JSON.stringify(initialSettings.current));
   }, [local]);
 
   const set = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) =>
-    setLocal((prev) => ({ ...prev, [key]: value }));
+    setLocal(prev => ({ ...prev, [key]: value }));
 
-  /* ── Save ── */
   const handleSave = async () => {
     if (!token || !user) return;
     setSaveStatus("saving");
@@ -331,12 +236,8 @@ function SettingsContent() {
     }
   };
 
-  /* ── Section order ── */
   const rawOrder: string[] = local.sectionOrder ?? [...ALL_SECTIONS];
-  const sectionOrder = [
-    ...rawOrder,
-    ...ALL_SECTIONS.filter((s) => !rawOrder.includes(s)),
-  ];
+  const sectionOrder = [...rawOrder, ...ALL_SECTIONS.filter(s => !rawOrder.includes(s))];
   const hideSections: string[] = local.hideSections ?? [];
 
   const moveSectionUp = (idx: number) => {
@@ -353,25 +254,18 @@ function SettingsContent() {
   };
   const toggleSection = (id: string) => {
     const next = hideSections.includes(id)
-      ? hideSections.filter((s) => s !== id)
+      ? hideSections.filter(s => s !== id)
       : [...hideSections, id];
     set("hideSections", next);
   };
 
-  /* ── Intersection observer for active nav ── */
   useEffect(() => {
-    const sections = NAV_SECTIONS.map((s) =>
-      document.getElementById(s.id),
-    ).filter(Boolean);
+    const sections = NAV_SECTIONS.map(s => document.getElementById(s.id)).filter(Boolean);
     const obs = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
-        }
-      },
-      { threshold: 0.2, rootMargin: "-60px 0px -60% 0px" },
+      entries => { for (const e of entries) { if (e.isIntersecting) setActiveSection(e.target.id); } },
+      { threshold: 0.2, rootMargin: "-64px 0px -60% 0px" }
     );
-    sections.forEach((el) => el && obs.observe(el));
+    sections.forEach(el => el && obs.observe(el));
     return () => obs.disconnect();
   }, [loading]);
 
@@ -379,133 +273,104 @@ function SettingsContent() {
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background">
-        <header className="border-b border-border h-12 bg-background sticky top-0 z-20" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="border border-border animate-pulse">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="px-6 py-4 border-b border-border">
-                <div className="w-32 h-3 bg-muted mb-2" />
-                <div className="w-full h-8 bg-muted" />
-              </div>
-            ))}
+        <header className="h-16 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-20" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <div className="grid lg:grid-cols-[220px_1fr] gap-8">
+            <div className="hidden lg:block rounded-2xl border border-border bg-card h-64 animate-pulse" />
+            <div className="space-y-5">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border bg-card p-6 animate-pulse">
+                  <div className="w-32 h-4 bg-muted rounded mb-4" />
+                  <div className="w-full h-10 bg-muted rounded" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     );
   }
-
   if (!user) return null;
 
   return (
     <div className="min-h-[100dvh] bg-background">
       {/* ── HEADER ─────────────────────────────────────────── */}
-      <header className="border-b border-border sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 label hover:text-foreground transition-colors shrink-0"
-            >
+      <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0">
               <ArrowLeft weight="bold" className="w-3.5 h-3.5" />
-              DASHBOARD
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
-            <span className="label hidden sm:block text-muted-foreground">
-              ///
-            </span>
-            <span className="label hidden sm:block text-foreground truncate">
-              SETTINGS
-            </span>
+            <span className="text-border hidden sm:block">·</span>
+            <span className="text-sm font-semibold text-foreground hidden sm:block">Settings</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Save status */}
             {saveStatus === "saved" && (
-              <span className="hidden sm:flex items-center gap-1.5 label text-foreground">
-                <CheckCircle weight="fill" className="w-3.5 h-3.5" />
-                SAVED
+              <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                <CheckCircle weight="fill" className="w-4 h-4" /> Saved
               </span>
             )}
             {saveStatus === "error" && (
-              <span className="hidden sm:flex items-center gap-1.5 label text-primary">
-                <WarningCircle weight="fill" className="w-3.5 h-3.5" />
-                ERROR
+              <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-red-500">
+                <WarningCircle weight="fill" className="w-4 h-4" /> Error
               </span>
             )}
             {isDirty && saveStatus === "idle" && (
-              <span className="hidden sm:flex items-center gap-1.5 label text-muted-foreground">
-                UNSAVED CHANGES
-              </span>
+              <span className="hidden sm:inline text-xs text-muted-foreground">Unsaved changes</span>
             )}
 
             <button
-              type="button"
-              onClick={handleSave}
+              type="button" onClick={handleSave}
               disabled={saveStatus === "saving" || !isDirty}
-              className={`flex items-center gap-1.5 px-4 py-1.5 border text-[11px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                 isDirty
-                  ? "border-foreground bg-foreground text-background hover:bg-foreground/90"
+                  ? "border-foreground bg-foreground text-background hover:bg-foreground/90 shadow-sm"
                   : "border-border text-muted-foreground"
               }`}
             >
-              {saveStatus === "saving" ? (
-                <>
-                  <Spinner weight="bold" className="w-3.5 h-3.5 animate-spin" />{" "}
-                  SAVING…
-                </>
-              ) : (
-                <>
-                  <FloppyDisk weight="bold" className="w-3.5 h-3.5" /> SAVE
-                  CHANGES
-                </>
-              )}
+              {saveStatus === "saving"
+                ? <><Spinner weight="bold" className="w-3.5 h-3.5 animate-spin" /> Saving…</>
+                : <><FloppyDisk weight="bold" className="w-3.5 h-3.5" /> Save</>
+              }
             </button>
 
             <ThemeToggle />
             <button
-              onClick={() => {
-                localStorage.removeItem("auth_token");
-                router.push("/");
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-border text-[11px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground transition-colors active:scale-[0.98]"
+              onClick={() => { localStorage.removeItem("auth_token"); router.push("/"); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
             >
               <SignOut weight="regular" className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">SIGN OUT</span>
+              <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Unsaved changes banner (mobile) */}
+      {/* Unsaved banner (mobile) */}
       {isDirty && saveStatus === "idle" && (
-        <div className="sm:hidden border-b border-border bg-muted/60 px-4 py-2 flex items-center justify-between">
-          <span className="label text-muted-foreground">UNSAVED CHANGES</span>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="label text-foreground hover:underline"
-          >
-            SAVE
-          </button>
+        <div className="sm:hidden bg-secondary/60 border-b border-border/60 px-4 py-2.5 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Unsaved changes</span>
+          <button type="button" onClick={handleSave} className="text-sm font-semibold text-foreground">Save</button>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-[200px_1fr]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid lg:grid-cols-[220px_1fr] gap-8">
           {/* ── SIDEBAR NAV ──────────────────────── */}
-          <aside className="hidden lg:block border-r border-border">
-            <nav className="sticky top-12 pt-6 pb-8">
-              <div className="label text-[9px] tracking-widest text-muted-foreground px-4 mb-3">
-                SECTIONS
-              </div>
-              <ul className="space-y-0">
-                {NAV_SECTIONS.map((sec) => (
+          <aside className="hidden lg:block">
+            <nav className="sticky top-24 rounded-2xl border border-border bg-card p-3 shadow-card">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground px-3 py-2">Sections</p>
+              <ul className="space-y-0.5">
+                {NAV_SECTIONS.map(sec => (
                   <li key={sec.id}>
                     <a
                       href={`#${sec.id}`}
-                      className={`block px-4 py-2 label transition-colors border-l-2 ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                         activeSection === sec.id
-                          ? "border-foreground text-foreground"
-                          : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                          ? "bg-foreground text-background font-medium"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
                       {sec.label}
@@ -514,331 +379,250 @@ function SettingsContent() {
                 ))}
               </ul>
 
-              <div className="mt-6 px-4">
+              <div className="mt-4 pt-4 border-t border-border/60">
                 <button
-                  type="button"
-                  onClick={handleSave}
+                  type="button" onClick={handleSave}
                   disabled={saveStatus === "saving" || !isDirty}
-                  className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                     isDirty
                       ? "border-foreground bg-foreground text-background"
                       : "border-border text-muted-foreground"
                   }`}
                 >
-                  <FloppyDisk weight="bold" className="w-3 h-3" />
-                  {saveStatus === "saving" ? "SAVING…" : "SAVE"}
+                  <FloppyDisk weight="bold" className="w-3.5 h-3.5" />
+                  {saveStatus === "saving" ? "Saving…" : "Save changes"}
                 </button>
               </div>
             </nav>
           </aside>
 
-          {/* ── MAIN SETTINGS FORM ───────────────── */}
-          <div className="border-r-0 lg:border-l-0">
-            {/* == APPEARANCE == */}
-            <SectionHeader id="appearance" label="APPEARANCE" />
+          {/* ── MAIN FORM ────────────────────────── */}
+          <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+            <div className="px-6">
 
-            <FieldBlock label="ACCENT COLOR">
-              <div className="flex flex-wrap gap-1.5">
-                {ACCENT_OPTIONS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => set("accentColor", color)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
-                      local.accentColor === color
-                        ? "border-foreground text-foreground bg-muted"
-                        : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <span
-                      className={`w-2.5 h-2.5 shrink-0 ${ACCENT_CLASSES[color]}`}
-                    />
-                    {color.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </FieldBlock>
+              {/* == APPEARANCE == */}
+              <SectionHeader id="appearance" label="Appearance" />
 
-            <FieldBlock label="LAYOUT VARIANT">
-              <OptionGroup
-                value={local.layoutVariant}
-                options={["brutalist", "terminal", "minimal"] as const}
-                labels={{
-                  brutalist: "BRUTALIST",
-                  terminal: "TERMINAL",
-                  minimal: "MINIMAL",
-                }}
-                onChange={(v) => set("layoutVariant", v)}
-              />
-              <p className="label text-muted-foreground mt-2 text-[9px]">
-                TERMINAL AND MINIMAL ARE COMING SOON — CURRENTLY RENDERS AS
-                BRUTALIST
-              </p>
-            </FieldBlock>
-
-            <FieldBlock label="HERO NAME STYLE">
-              <OptionGroup
-                value={local.heroStyle}
-                options={["name-full", "name-initials", "name-split"] as const}
-                labels={{
-                  "name-full": "FULL NAME",
-                  "name-initials": "INITIALS ONLY",
-                  "name-split": "SPLIT LETTERS",
-                }}
-                onChange={(v) => set("heroStyle", v)}
-              />
-            </FieldBlock>
-
-            <FieldBlock label="FONT STYLE">
-              <OptionGroup
-                value={local.fontStyle}
-                options={["display", "mono", "mixed"] as const}
-                labels={{
-                  display: "DISPLAY (CABINET GROTESK)",
-                  mono: "MONO",
-                  mixed: "MIXED",
-                }}
-                onChange={(v) => set("fontStyle", v)}
-              />
-            </FieldBlock>
-
-            {/* == CONTENT == */}
-            <SectionHeader id="content" label="CONTENT" />
-
-            <FieldBlock label="AVAILABILITY BADGE">
-              <div className="flex flex-wrap gap-1">
-                {([null, "open", "busy", "closed"] as const).map((val) => (
-                  <button
-                    key={String(val)}
-                    type="button"
-                    onClick={() => set("availability", val)}
-                    className={`px-2.5 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
-                      local.availability === val
-                        ? "border-foreground text-foreground bg-muted"
-                        : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {val === null
-                      ? "NONE"
-                      : val === "open"
-                        ? "OPEN TO WORK"
-                        : val === "busy"
-                          ? "BUSY"
-                          : "CLOSED"}
-                  </button>
-                ))}
-              </div>
-            </FieldBlock>
-
-            <div className="px-6 py-4 border-b border-border">
-              <Toggle
-                value={local.showEmail}
-                onChange={(v) => set("showEmail", v)}
-                label="SHOW EMAIL ADDRESS"
-              />
-              <Toggle
-                value={local.showAvatar}
-                onChange={(v) => set("showAvatar", v)}
-                label="SHOW AVATAR IN HERO"
-              />
-              <Toggle
-                value={local.showTopics}
-                onChange={(v) => set("showTopics", v)}
-                label="SHOW REPO TOPICS"
-              />
-            </div>
-
-            <FieldBlock label="MAX REPOS DISPLAYED">
-              <OptionGroup
-                value={local.maxRepos}
-                options={[4, 6, 8, 12] as const}
-                onChange={(v) => set("maxRepos", v)}
-              />
-            </FieldBlock>
-
-            <FieldBlock label="SORT REPOS BY">
-              <OptionGroup
-                value={local.repoSortBy}
-                options={["stars", "forks", "updated", "pinned-first"] as const}
-                labels={{
-                  stars: "STARS",
-                  forks: "FORKS",
-                  updated: "RECENTLY UPDATED",
-                  "pinned-first": "PINNED FIRST",
-                }}
-                onChange={(v) => set("repoSortBy", v)}
-              />
-            </FieldBlock>
-
-            <FieldBlock label="REPO DISPLAY STYLE">
-              <OptionGroup
-                value={local.repoDisplayStyle}
-                options={["table", "cards", "compact"] as const}
-                labels={{
-                  table: "TABLE",
-                  cards: "CARDS (2 COLS)",
-                  compact: "COMPACT LIST",
-                }}
-                onChange={(v) => set("repoDisplayStyle", v)}
-              />
-            </FieldBlock>
-
-            {/* == ABOUT == */}
-            <SectionHeader id="about" label="ABOUT TEXT" />
-
-            <div className="px-6 py-4 border-b border-border space-y-1.5">
-              <textarea
-                value={local.aboutText ?? ""}
-                onChange={(e) =>
-                  set("aboutText", e.target.value.slice(0, 1000))
-                }
-                placeholder="WRITE A SHORT BIO OR DESCRIPTION THAT APPEARS ON YOUR PORTFOLIO…"
-                rows={6}
-                className="w-full px-3 py-2.5 border border-border bg-background font-mono text-xs resize-none placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
-              />
-              <div className="flex items-center justify-between">
-                <span className="label text-muted-foreground text-[9px]">
-                  DISPLAYED IN THE ABOUT SECTION ON YOUR PORTFOLIO
-                </span>
-                <span className="label text-[9px]">
-                  {(local.aboutText ?? "").length}/1000
-                </span>
-              </div>
-            </div>
-
-            {/* == TECH STACK == */}
-            <SectionHeader id="stack" label="TECH STACK" />
-
-            <div className="px-6 py-4 border-b border-border">
-              <TechStackInput
-                value={local.techStack ?? []}
-                onChange={(v) => set("techStack", v)}
-              />
-              <p className="label text-muted-foreground mt-3 text-[9px]">
-                UP TO 30 TECHNOLOGIES — DISPLAYED AS TAGS ON YOUR PORTFOLIO
-              </p>
-            </div>
-
-            {/* == FEATURED REPO == */}
-            <SectionHeader id="featured" label="FEATURED REPO" />
-
-            <div className="px-6 py-4 border-b border-border space-y-2">
-              <p className="label text-muted-foreground text-[9px]">
-                SELECT ONE REPO TO FEATURE AT THE TOP OF YOUR REPOSITORIES
-                SECTION
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => set("featuredRepo", null)}
-                  className={`px-2.5 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
-                    !local.featuredRepo
-                      ? "border-foreground text-foreground bg-muted"
-                      : "border-border text-muted-foreground hover:border-foreground"
-                  }`}
-                >
-                  NONE
-                </button>
-                {(user.githubData?.repos ?? [])
-                  .sort((a, b) => b.stargazers_count - a.stargazers_count)
-                  .slice(0, 12)
-                  .map((repo) => (
+              <FieldBlock label="Accent color" hint="Sets the primary color used throughout your portfolio.">
+                <div className="flex flex-wrap gap-2">
+                  {ACCENT_OPTIONS.map(color => (
                     <button
-                      key={repo.name}
-                      type="button"
-                      onClick={() => set("featuredRepo", repo.name)}
-                      className={`px-2.5 py-1 border text-[10px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] ${
-                        local.featuredRepo === repo.name
-                          ? "border-foreground text-foreground bg-muted"
-                          : "border-border text-muted-foreground hover:border-foreground"
+                      key={color} type="button" onClick={() => set("accentColor", color)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
+                        local.accentColor === color
+                          ? "border-foreground bg-foreground text-background shadow-sm"
+                          : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground hover:bg-secondary"
                       }`}
                     >
-                      {repo.name}
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: ACCENT_COLORS[color]?.bg }} />
+                      {ACCENT_COLORS[color]?.label ?? color}
                     </button>
                   ))}
-              </div>
-            </div>
+                </div>
+              </FieldBlock>
 
-            {/* == SECTIONS & ORDER == */}
-            <SectionHeader id="sections" label="SECTIONS & ORDER" />
-
-            <div className="border-b border-border">
-              <div className="px-6 py-3">
-                <p className="label text-muted-foreground text-[9px]">
-                  DRAG THE ORDER OF SECTIONS AND TOGGLE THEIR VISIBILITY ON YOUR
-                  PORTFOLIO
-                </p>
-              </div>
-              {sectionOrder.map((id, idx) => (
-                <SectionRow
-                  key={id}
-                  id={id}
-                  label={SECTION_LABELS[id] ?? id.toUpperCase()}
-                  hidden={hideSections.includes(id)}
-                  isFirst={idx === 0}
-                  isLast={idx === sectionOrder.length - 1}
-                  onToggle={() => toggleSection(id)}
-                  onMoveUp={() => moveSectionUp(idx)}
-                  onMoveDown={() => moveSectionDown(idx)}
+              <FieldBlock label="Portfolio layout" hint="Brutalist is fully functional. Glass, Clean, and Editorial are coming soon.">
+                <OptionGroup
+                  value={local.layoutVariant}
+                  options={["brutalist", "glass", "clean", "editorial"] as const}
+                  labels={{ brutalist: "Brutalist", glass: "Glass", clean: "Clean", editorial: "Editorial" }}
+                  onChange={v => set("layoutVariant", v as UserSettings["layoutVariant"])}
                 />
-              ))}
-            </div>
+              </FieldBlock>
 
-            {/* == CUSTOM LINKS == */}
-            <SectionHeader id="links" label="CUSTOM LINKS" />
+              <FieldBlock label="Hero name style">
+                <OptionGroup
+                  value={local.heroStyle}
+                  options={["name-full", "name-initials", "name-split"] as const}
+                  labels={{ "name-full": "Full name", "name-initials": "Initials only", "name-split": "Split letters" }}
+                  onChange={v => set("heroStyle", v)}
+                />
+              </FieldBlock>
 
-            <div className="px-6 py-4 border-b border-border">
-              <CustomLinksEditor
-                value={local.customLinks ?? []}
-                onChange={(v) => set("customLinks", v)}
-              />
+              <FieldBlock label="Font style">
+                <OptionGroup
+                  value={local.fontStyle}
+                  options={["display", "mono", "mixed"] as const}
+                  labels={{ display: "Display", mono: "Monospace", mixed: "Mixed" }}
+                  onChange={v => set("fontStyle", v)}
+                />
+              </FieldBlock>
+
+              {/* == CONTENT == */}
+              <SectionHeader id="content" label="Content" />
+
+              <FieldBlock label="Availability badge">
+                <div className="flex flex-wrap gap-2">
+                  {([null, "open", "busy", "closed"] as const).map(val => (
+                    <button
+                      key={String(val)} type="button" onClick={() => set("availability", val)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
+                        local.availability === val
+                          ? "border-foreground bg-foreground text-background shadow-sm"
+                          : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {val === null ? "None" : val === "open" ? (
+                        <><span className="w-2 h-2 rounded-full bg-emerald-500" />Open to work</>
+                      ) : val === "busy" ? (
+                        <><span className="w-2 h-2 rounded-full bg-amber-500" />Busy</>
+                      ) : (
+                        <><span className="w-2 h-2 rounded-full bg-zinc-400" />Closed</>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </FieldBlock>
+
+              <div className="py-2 border-b border-border/60">
+                <Toggle value={local.showEmail}  onChange={v => set("showEmail", v)}  label="Show email address" />
+                <Toggle value={local.showAvatar} onChange={v => set("showAvatar", v)} label="Show avatar in hero" />
+                <Toggle value={local.showTopics} onChange={v => set("showTopics", v)} label="Show repository topics" />
+              </div>
+
+              <FieldBlock label="Max repositories displayed">
+                <OptionGroup
+                  value={local.maxRepos}
+                  options={[4, 6, 8, 12] as const}
+                  onChange={v => set("maxRepos", v)}
+                />
+              </FieldBlock>
+
+              <FieldBlock label="Sort repositories by">
+                <OptionGroup
+                  value={local.repoSortBy}
+                  options={["stars", "forks", "updated", "pinned-first"] as const}
+                  labels={{ stars: "Stars", forks: "Forks", updated: "Recently updated", "pinned-first": "Pinned first" }}
+                  onChange={v => set("repoSortBy", v)}
+                />
+              </FieldBlock>
+
+              <FieldBlock label="Repository display style">
+                <OptionGroup
+                  value={local.repoDisplayStyle}
+                  options={["table", "cards", "compact"] as const}
+                  labels={{ table: "Table", cards: "Cards (2 cols)", compact: "Compact list" }}
+                  onChange={v => set("repoDisplayStyle", v)}
+                />
+              </FieldBlock>
+
+              {/* == ABOUT == */}
+              <SectionHeader id="about" label="About text" />
+
+              <div className="py-5 border-b border-border/60 space-y-2">
+                <textarea
+                  value={local.aboutText ?? ""}
+                  onChange={e => set("aboutText", e.target.value.slice(0, 1000))}
+                  placeholder="Write a short bio or description that appears on your portfolio…"
+                  rows={5}
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm resize-none placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Displayed in the About section</span>
+                  <span className="text-xs font-mono text-muted-foreground">{(local.aboutText ?? "").length}/1000</span>
+                </div>
+              </div>
+
+              {/* == TECH STACK == */}
+              <SectionHeader id="stack" label="Tech stack" />
+
+              <div className="py-5 border-b border-border/60">
+                <TechStackInput value={local.techStack ?? []} onChange={v => set("techStack", v)} />
+                <p className="text-xs text-muted-foreground mt-3">Up to 30 technologies — displayed as tags on your portfolio.</p>
+              </div>
+
+              {/* == FEATURED REPO == */}
+              <SectionHeader id="featured" label="Featured repo" />
+
+              <div className="py-5 border-b border-border/60">
+                <p className="text-xs text-muted-foreground mb-3">Select one repository to feature prominently at the top of your repos section.</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button" onClick={() => set("featuredRepo", null)}
+                    className={`px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
+                      !local.featuredRepo
+                        ? "border-foreground bg-foreground text-background shadow-sm"
+                        : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    None
+                  </button>
+                  {(user.githubData?.repos ?? [])
+                    .sort((a, b) => b.stargazers_count - a.stargazers_count)
+                    .slice(0, 12)
+                    .map(repo => (
+                      <button
+                        key={repo.name} type="button" onClick={() => set("featuredRepo", repo.name)}
+                        className={`px-3.5 py-2 rounded-xl border text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
+                          local.featuredRepo === repo.name
+                            ? "border-foreground bg-foreground text-background shadow-sm"
+                            : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {repo.name}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              {/* == SECTIONS & ORDER == */}
+              <SectionHeader id="sections" label="Sections & order" />
+
+              <div className="py-4 border-b border-border/60">
+                <p className="text-xs text-muted-foreground mb-4">Reorder and toggle visibility of sections on your portfolio.</p>
+                <div className="divide-y divide-border/60">
+                  {sectionOrder.map((id, idx) => (
+                    <SectionRow
+                      key={id} id={id}
+                      label={SECTION_LABELS[id] ?? id}
+                      hidden={hideSections.includes(id)}
+                      isFirst={idx === 0} isLast={idx === sectionOrder.length - 1}
+                      onToggle={() => toggleSection(id)}
+                      onMoveUp={() => moveSectionUp(idx)}
+                      onMoveDown={() => moveSectionDown(idx)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* == CUSTOM LINKS == */}
+              <SectionHeader id="links" label="Custom links" />
+
+              <div className="py-5">
+                <CustomLinksEditor value={local.customLinks ?? []} onChange={v => set("customLinks", v)} />
+              </div>
             </div>
 
             {/* ── BOTTOM SAVE ─── */}
-            <div className="px-6 py-6 flex items-center justify-between gap-4">
+            <div className="px-6 py-5 border-t border-border/60 bg-secondary/20 flex items-center justify-between gap-4">
               <div>
                 {saveStatus === "saved" && (
-                  <span className="flex items-center gap-1.5 label text-foreground">
-                    <CheckCircle weight="fill" className="w-3.5 h-3.5" />
-                    CHANGES SAVED SUCCESSFULLY
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle weight="fill" className="w-4 h-4" /> Changes saved successfully
                   </span>
                 )}
                 {saveStatus === "error" && (
-                  <span className="flex items-center gap-1.5 label text-primary">
-                    <WarningCircle weight="fill" className="w-3.5 h-3.5" />
-                    SAVE FAILED — PLEASE RETRY
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-red-500">
+                    <WarningCircle weight="fill" className="w-4 h-4" /> Save failed — please retry
                   </span>
                 )}
                 {isDirty && saveStatus === "idle" && (
-                  <span className="label text-muted-foreground">
-                    YOU HAVE UNSAVED CHANGES
-                  </span>
+                  <span className="text-sm text-muted-foreground">You have unsaved changes</span>
                 )}
               </div>
               <button
-                type="button"
-                onClick={handleSave}
+                type="button" onClick={handleSave}
                 disabled={saveStatus === "saving" || !isDirty}
-                className={`flex items-center gap-2 px-6 py-2.5 border text-[11px] font-mono uppercase tracking-wider transition-colors active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                   isDirty
-                    ? "border-foreground bg-foreground text-background hover:bg-foreground/90"
+                    ? "border-foreground bg-foreground text-background hover:bg-foreground/90 shadow-sm"
                     : "border-border text-muted-foreground"
                 }`}
               >
-                {saveStatus === "saving" ? (
-                  <>
-                    <Spinner
-                      weight="bold"
-                      className="w-3.5 h-3.5 animate-spin"
-                    />{" "}
-                    SAVING…
-                  </>
-                ) : (
-                  <>
-                    <FloppyDisk weight="bold" className="w-3.5 h-3.5" /> SAVE
-                    CHANGES
-                  </>
-                )}
+                {saveStatus === "saving"
+                  ? <><Spinner weight="bold" className="w-3.5 h-3.5 animate-spin" /> Saving…</>
+                  : <><FloppyDisk weight="bold" className="w-3.5 h-3.5" /> Save changes</>
+                }
               </button>
             </div>
           </div>
@@ -849,10 +633,7 @@ function SettingsContent() {
 }
 
 /* ─── Custom links editor ─────────────────────────────── */
-function CustomLinksEditor({
-  value,
-  onChange,
-}: {
+function CustomLinksEditor({ value, onChange }: {
   value: Array<{ label: string; url: string; icon?: string }>;
   onChange: (v: Array<{ label: string; url: string; icon?: string }>) => void;
 }) {
@@ -862,31 +643,20 @@ function CustomLinksEditor({
   const addLink = () => {
     if (!newLabel.trim() || !newUrl.trim()) return;
     const safeUrl = newUrl.startsWith("http") ? newUrl : `https://${newUrl}`;
-    onChange([
-      ...value,
-      { label: newLabel.trim().toUpperCase(), url: safeUrl },
-    ]);
-    setNewLabel("");
-    setNewUrl("");
+    onChange([...value, { label: newLabel.trim(), url: safeUrl }]);
+    setNewLabel(""); setNewUrl("");
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {value.length > 0 && (
-        <div className="divide-y divide-border border border-border">
+        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
           {value.map((link, i) => (
-            <div key={i} className="flex items-center gap-3 px-3 py-2.5">
-              <span className="label text-foreground truncate flex-1">
-                {link.label}
-              </span>
-              <span className="label text-muted-foreground truncate flex-1 text-right">
-                {link.url.replace(/^https?:\/\//, "")}
-              </span>
-              <button
-                type="button"
-                onClick={() => onChange(value.filter((_, j) => j !== i))}
-                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-              >
+            <div key={i} className="flex items-center gap-3 px-4 py-3 bg-secondary/20">
+              <span className="text-sm font-medium text-foreground truncate flex-1">{link.label}</span>
+              <span className="text-xs text-muted-foreground truncate flex-1 text-right">{link.url.replace(/^https?:\/\//, "")}</span>
+              <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0">
                 <X weight="bold" className="w-3 h-3" />
               </button>
             </div>
@@ -897,32 +667,22 @@ function CustomLinksEditor({
       {value.length < 10 && (
         <div className="flex flex-col sm:flex-row gap-2">
           <input
-            type="text"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            placeholder="LABEL"
-            className="flex-1 px-3 py-2 border border-border bg-background font-mono text-xs uppercase tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
+            type="text" value={newLabel} onChange={e => setNewLabel(e.target.value)}
+            placeholder="Label" onKeyDown={e => e.key === "Enter" && addLink()}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
           />
           <input
-            type="url"
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="https://..."
-            onKeyDown={(e) => e.key === "Enter" && addLink()}
-            className="flex-[2] px-3 py-2 border border-border bg-background font-mono text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
+            type="url" value={newUrl} onChange={e => setNewUrl(e.target.value)}
+            placeholder="https://…" onKeyDown={e => e.key === "Enter" && addLink()}
+            className="flex-[2] px-4 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
           />
-          <button
-            type="button"
-            onClick={addLink}
-            className="px-4 py-2 border border-border text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground transition-colors active:scale-[0.98] shrink-0"
-          >
-            ADD
+          <button type="button" onClick={addLink}
+            className="px-5 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors active:scale-[0.97] shrink-0">
+            Add
           </button>
         </div>
       )}
-      <p className="label text-muted-foreground text-[9px]">
-        {value.length}/10 LINKS — SHOWN IN THE LINKS SECTION AND META STRIP
-      </p>
+      <p className="text-xs text-muted-foreground">{value.length}/10 links — shown in the links section and meta strip.</p>
     </div>
   );
 }

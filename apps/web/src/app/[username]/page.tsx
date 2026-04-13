@@ -237,7 +237,7 @@ export default async function PortfolioPage({ params }: Props) {
         return (
           <div
             key="stats"
-            className="border border-border grid grid-cols-2 sm:grid-cols-4 mb-8"
+            className="border border-border grid grid-cols-2 sm:grid-cols-4 mb-8 pf-section"
           >
             <div className="px-4 py-5 text-center border-r border-b sm:border-b-0 border-border">
               <div className="font-mono text-2xl sm:text-3xl font-bold text-foreground">
@@ -277,7 +277,7 @@ export default async function PortfolioPage({ params }: Props) {
       case "repos":
         if (allRepos.length === 0 && !featuredRepo) return null;
         return (
-          <div key="repos" className="border border-border mb-8">
+          <div key="repos" className="border border-border mb-8 pf-section">
             <div className="border-b border-border px-4 py-2.5 bg-muted flex items-center justify-between">
               <span className="label">[ REPOSITORIES ]</span>
               <span className="label">{allRepos.length} TOTAL</span>
@@ -535,7 +535,7 @@ export default async function PortfolioPage({ params }: Props) {
       case "languages":
         if (topLanguages.length === 0) return null;
         return (
-          <div key="languages" className="border border-border mb-8">
+          <div key="languages" className="border border-border mb-8 pf-section">
             <div className="border-b border-border px-4 py-2.5 bg-muted">
               <span className="label">[ LANGUAGE DISTRIBUTION ]</span>
             </div>
@@ -580,7 +580,7 @@ export default async function PortfolioPage({ params }: Props) {
       case "about":
         if (!aboutText) return null;
         return (
-          <section key="about" className="border border-border mb-8">
+          <section key="about" className="border border-border mb-8 pf-section">
             <div className="border-b border-border px-4 py-2.5 bg-muted">
               <span className="label">[ ABOUT ]</span>
             </div>
@@ -595,7 +595,7 @@ export default async function PortfolioPage({ params }: Props) {
       case "stack":
         if (techStack.length === 0) return null;
         return (
-          <section key="stack" className="border border-border mb-8">
+          <section key="stack" className="border border-border mb-8 pf-section">
             <div className="border-b border-border px-4 py-2.5 bg-muted">
               <span className="label">[ TECH STACK ]</span>
             </div>
@@ -626,7 +626,7 @@ export default async function PortfolioPage({ params }: Props) {
       case "links":
         if ((settings.customLinks ?? []).length === 0) return null;
         return (
-          <section key="links" className="border border-border mb-8">
+          <section key="links" className="border border-border mb-8 pf-section">
             <div className="border-b border-border px-4 py-2.5 bg-muted">
               <span className="label">[ LINKS ]</span>
             </div>
@@ -670,7 +670,7 @@ export default async function PortfolioPage({ params }: Props) {
       {accent && (
         <style>{`:root,:root.dark{--primary:${accent.primary};--accent:${accent.primary};--ring:${accent.ring}}`}</style>
       )}
-      <div className="min-h-[100dvh] bg-background">
+      <div className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "glass" ? " theme-glass" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}>
         {/* ── NAV ─────────────────────────────────── */}
         <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">

@@ -4,10 +4,12 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   GithubLogo,
-  ArrowRight,
   WarningCircle,
   ArrowLeft,
   Spinner,
+  ShieldCheck,
+  Lock,
+  Timer,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -16,9 +18,9 @@ import { getCurrentUser } from "@/lib/api";
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
 
 const ERRORS: Record<string, string> = {
-  oauth_failed: "GITHUB OAUTH FAILED. PLEASE RETRY.",
-  token_exchange_failed: "TOKEN EXCHANGE FAILED. PLEASE RETRY.",
-  server_error: "SERVER ERROR. PLEASE RETRY.",
+  oauth_failed: "GitHub OAuth failed. Please try again.",
+  token_exchange_failed: "Token exchange failed. Please try again.",
+  server_error: "Server error. Please try again.",
 };
 
 function LoginContent() {
@@ -47,9 +49,9 @@ function LoginContent() {
   if (checking) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2.5 label">
-          <Spinner weight="bold" className="w-4 h-4 animate-spin" />
-          CHECKING SESSION…
+        <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+          <Spinner weight="bold" className="w-4 h-4 animate-spin text-primary" />
+          Checking session…
         </div>
       </div>
     );
@@ -57,105 +59,140 @@ function LoginContent() {
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
-      {/* Top bar */}
-      <div className="border-b border-border px-6 py-3 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2 label hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          INITMYFOLIO
-        </Link>
-        <ThemeToggle />
-      </div>
+      {/* Floating nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-5">
+        <div className="max-w-5xl mx-auto flex items-center justify-between px-5 py-3 rounded-2xl border border-border/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-sm">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            initmyfolio
+          </Link>
+          <ThemeToggle />
+        </div>
+      </nav>
 
-      {/* Terminal card */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-[380px] border border-border">
-          {/* Terminal header */}
-          <div className="border-b border-border px-4 py-2 bg-muted flex items-center justify-between">
-            <span className="label">[ AUTHENTICATION TERMINAL ]</span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 bg-primary rounded-full" />
-              <span className="label text-primary">ONLINE</span>
-            </div>
-          </div>
-
-          <div className="p-8">
-            {/* Brand */}
-            <div className="mb-8">
-              <div className="font-display uppercase tracking-tighter text-foreground text-3xl mb-1">
-                INITMYFOLIO
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center px-4 pt-28 pb-12">
+        <div className="w-full max-w-[400px]">
+          {/* Glass card */}
+          <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+            <div className="px-8 pt-8 pb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+                <GithubLogo weight="bold" className="w-5 h-5 text-primary" />
               </div>
-              <div className="label">PORTFOLIO GENERATION SYSTEM · REV 1.0</div>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1.5">
+                Sign in to initmyfolio
+              </h1>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Connect your GitHub account to generate and manage your
+                developer portfolio.
+              </p>
             </div>
 
-            {/* Data lines */}
-            <div className="space-y-1.5 mb-6 border border-border p-4 bg-muted">
-              {[
-                ["PROTOCOL", "GITHUB OAUTH 2.0"],
-                ["SCOPE", "READ:USER // USER:EMAIL"],
-                ["ACCESS", "PUBLIC DATA ONLY"],
-                ["SESSION", "JWT / 30D TTL"],
-              ].map(([k, v]) => (
-                <div key={k} className="flex items-center gap-3">
-                  <span className="label w-20 shrink-0">{k}</span>
-                  <span className="label text-foreground">{v}</span>
+            <div className="px-8 pb-8 space-y-4">
+              {/* Permission info */}
+              <div className="rounded-xl border border-border bg-secondary/50 divide-y divide-border/60">
+                {[
+                  {
+                    icon: ShieldCheck,
+                    label: "Public data only",
+                    detail: "Read-only access to profile & repos",
+                  },
+                  {
+                    icon: Lock,
+                    label: "Secure OAuth 2.0",
+                    detail: "We never store your password",
+                  },
+                  {
+                    icon: Timer,
+                    label: "30-day session",
+                    detail: "Re-authenticate anytime",
+                  },
+                ].map(({ icon: Icon, label, detail }) => (
+                  <div key={label} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center shrink-0 border border-border/50">
+                      <Icon
+                        weight="regular"
+                        className="w-3.5 h-3.5 text-muted-foreground"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-foreground">
+                        {label}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {detail}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
+                  <WarningCircle
+                    weight="fill"
+                    className="w-4 h-4 text-destructive mt-0.5 shrink-0"
+                  />
+                  <span className="text-xs text-destructive">
+                    {ERRORS[error] ?? "Authentication error. Please try again."}
+                  </span>
                 </div>
-              ))}
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="flex items-start gap-2.5 border border-primary p-3 mb-4 bg-primary/5">
-                <WarningCircle
-                  weight="fill"
-                  className="w-4 h-4 text-primary mt-0.5 shrink-0"
-                />
-                <span className="label text-primary">
-                  {ERRORS[error] ?? "AUTH ERROR. RETRY."}
-                </span>
-              </div>
-            )}
-
-            {/* CTA */}
-            <button
-              onClick={() => {
-                setLoading(true);
-                window.location.href = `${API_URL}/auth/github`;
-              }}
-              disabled={loading}
-              className="w-full flex items-center justify-between px-5 py-3.5 bg-foreground text-background border border-foreground text-sm font-mono uppercase tracking-wider hover:bg-primary hover:border-primary transition-colors duration-200 active:scale-[0.98] disabled:opacity-50 group"
-            >
-              <div className="flex items-center gap-2.5">
-                <GithubLogo weight="bold" className="w-4 h-4" />
-                {loading ? "CONNECTING…" : "AUTHENTICATE VIA GITHUB"}
-              </div>
-              {!loading && (
-                <ArrowRight
-                  weight="bold"
-                  className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
-                />
               )}
-            </button>
 
-            <p className="label text-center mt-5">
-              BY CONTINUING YOU ACCEPT OUR{" "}
-              <Link
-                href="/terms"
-                className="text-foreground underline underline-offset-2"
+              {/* CTA */}
+              <button
+                onClick={() => {
+                  setLoading(true);
+                  window.location.href = `${API_URL}/auth/github`;
+                }}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
               >
-                TERMS
-              </Link>{" "}
-              AND{" "}
-              <Link
-                href="/privacy"
-                className="text-foreground underline underline-offset-2"
-              >
-                PRIVACY POLICY
-              </Link>
-            </p>
+                {loading ? (
+                  <>
+                    <Spinner weight="bold" className="w-4 h-4 animate-spin" />
+                    Connecting…
+                  </>
+                ) : (
+                  <>
+                    <GithubLogo weight="bold" className="w-4 h-4" />
+                    Continue with GitHub
+                  </>
+                )}
+              </button>
+
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                By continuing you agree to our{" "}
+                <Link
+                  href="/terms"
+                  className="text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity"
+                >
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  className="text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity"
+                >
+                  Privacy Policy
+                </Link>
+              </p>
+            </div>
           </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-5">
+            Already have a portfolio?{" "}
+            <Link
+              href="/"
+              className="text-foreground font-medium hover:underline underline-offset-2"
+            >
+              View examples
+            </Link>
+          </p>
         </div>
       </div>
     </div>

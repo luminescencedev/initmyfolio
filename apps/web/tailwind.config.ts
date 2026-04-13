@@ -21,15 +21,16 @@ const config: Config = {
         destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
       },
+      /* CSS-variable-driven radius — multiplies to 0 in brutalist portfolio theme */
       borderRadius: {
-        DEFAULT: "0",
+        DEFAULT: "var(--radius)",
         none: "0",
-        sm: "0",
-        md: "0",
-        lg: "0",
-        xl: "0",
-        "2xl": "0",
-        "3xl": "0",
+        sm: "calc(var(--radius) * 0.5)",
+        md: "var(--radius)",
+        lg: "var(--radius)",
+        xl: "calc(var(--radius) * 1.333)",
+        "2xl": "calc(var(--radius) * 1.667)",
+        "3xl": "calc(var(--radius) * 2)",
         full: "9999px",
       },
       fontFamily: {
@@ -43,6 +44,13 @@ const config: Config = {
       letterSpacing: {
         widest: "0.15em",
         ultrawide: "0.25em",
+      },
+      boxShadow: {
+        "glass": "0 8px 32px -4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
+        "glass-dark": "0 8px 32px -4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+        "card": "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px -2px rgba(0,0,0,0.04)",
+        "card-hover": "0 4px 12px rgba(0,0,0,0.08), 0 8px 32px -4px rgba(0,0,0,0.06)",
+        "elevated": "0 20px 40px -12px rgba(0,0,0,0.1)",
       },
     },
   },

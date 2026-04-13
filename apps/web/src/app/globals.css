@@ -4,47 +4,47 @@
 
 @layer base {
   :root {
-    /* White + Red (light mode) */
-    --background: 0 0% 99%;
-    --foreground: 0 0% 6%;
-    --card: 0 0% 97%;
-    --card-foreground: 0 0% 6%;
-    --primary: 0 80% 50%;
+    /* ── Light mode: Apple-inspired clean palette ─────── */
+    --background: 0 0% 98%;
+    --foreground: 240 10% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 93%;
-    --secondary-foreground: 0 0% 6%;
-    --muted: 0 0% 93%;
-    --muted-foreground: 0 0% 42%;
-    --accent: 0 80% 50%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 80% 50%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 86%;
-    --input: 0 0% 86%;
-    --ring: 0 80% 50%;
-    --radius: 0;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 221 83% 53%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    /* Dark + Cyan (dark mode) */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 92%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 92%;
-    --primary: 188 85% 48%;
-    --primary-foreground: 220 20% 5%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 92%;
-    --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 52%;
-    --accent: 188 85% 48%;
-    --accent-foreground: 220 20% 5%;
-    --destructive: 0 63% 40%;
-    --destructive-foreground: 0 0% 92%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 188 85% 48%;
-    --radius: 0;
+    /* ── Dark mode: zinc-950 base ─────────────────────── */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 7%;
+    --card-foreground: 0 0% 98%;
+    --primary: 213 93% 67%;
+    --primary-foreground: 224 71% 4%;
+    --secondary: 240 4% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 10%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 213 93% 67%;
+    --accent-foreground: 224 71% 4%;
+    --destructive: 0 63% 41%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 213 93% 67%;
+    --radius: 0.75rem;
   }
 }
 
@@ -54,24 +54,99 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "kern" 1, "liga" 1;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-/* ── Noise grain overlay ──────────────────────────────── */
+/* ── Subtle noise grain ───────────────────────────────── */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.028;
+  opacity: 0.012;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
 
-/* ── CRT scanlines (dark mode only) ──────────────────── */
-.dark body::before {
+/* ── Marquee ──────────────────────────────────────────── */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 36s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ── Stagger fade-up ──────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+
+/* ── Typewriter cursor ────────────────────────────────── */
+@keyframes blink { 50% { opacity: 0; } }
+.cursor::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+  color: hsl(var(--primary));
+}
+
+/* ── Utility: label ───────────────────────────────────── */
+.label {
+  @apply font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground;
+}
+
+/* ── Hard shadow (brutalist) ──────────────────────────── */
+.shadow-hard     { box-shadow: 4px 4px 0px hsl(var(--foreground)); }
+.shadow-hard-red { box-shadow: 4px 4px 0px hsl(var(--primary)); }
+
+/* ── Brutalist portfolio theme ────────────────────────── */
+/* Scoped CSS variables — overrides :root when this class is present  */
+/* Browsers cascade custom properties from the nearest declaring ancestor */
+.theme-brutalist {
+  --radius: 0;
+  --background: 0 0% 99%;
+  --foreground: 0 0% 6%;
+  --card: 0 0% 97%;
+  --card-foreground: 0 0% 6%;
+  --border: 0 0% 86%;
+  --input: 0 0% 86%;
+  --muted: 0 0% 93%;
+  --muted-foreground: 0 0% 42%;
+  --secondary: 0 0% 93%;
+  --secondary-foreground: 0 0% 6%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100dvh;
+}
+.dark .theme-brutalist {
+  --background: 0 0% 4%;
+  --foreground: 0 0% 92%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 92%;
+  --border: 0 0% 14%;
+  --input: 0 0% 14%;
+  --muted: 0 0% 9%;
+  --muted-foreground: 0 0% 52%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 92%;
+}
+/* CRT scanlines for brutalist dark portfolios */
+.dark .theme-brutalist::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -86,42 +161,165 @@ body::after {
   );
 }
 
-/* ── Marquee ──────────────────────────────────────────── */
-@keyframes marquee-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+/* ── Glass portfolio theme ─────────────────────────── */
+.theme-glass {
+  --radius: 1rem;
+  --background: 210 40% 96%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 88%;
+  --input: 214 32% 88%;
+  --muted: 210 40% 93%;
+  --muted-foreground: 215 16% 47%;
+  --secondary: 210 40% 93%;
+  --secondary-foreground: 222 47% 11%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100dvh;
 }
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-scroll 28s linear infinite;
+.dark .theme-glass {
+  --background: 222 47% 6%;
+  --foreground: 213 31% 91%;
+  --card: 222 47% 11%;
+  --card-foreground: 213 31% 91%;
+  --border: 222 47% 20%;
+  --input: 222 47% 20%;
+  --muted: 222 47% 9%;
+  --muted-foreground: 215 20% 55%;
+  --secondary: 222 47% 12%;
+  --secondary-foreground: 213 31% 91%;
 }
-.marquee-track:hover { animation-play-state: paused; }
-
-/* ── Stagger fade-up ──────────────────────────────────── */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+.theme-glass nav {
+  background: hsl(var(--background) / 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
-.animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-
-/* ── Typewriter cursor ────────────────────────────────── */
-@keyframes blink { 50% { opacity: 0; } }
-.cursor::after {
-  content: '_';
-  animation: blink 1s step-end infinite;
-  color: hsl(var(--primary));
+.theme-glass .pf-section {
+  border-radius: calc(var(--radius) * 1.333);
+  overflow: hidden;
+  background: hsl(var(--card) / 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: hsl(var(--border) / 0.6);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.5),
+    0 4px 20px hsl(0 0% 0% / 0.06);
+}
+.dark .theme-glass .pf-section {
+  background: hsl(var(--card) / 0.6);
+  border-color: hsl(var(--border) / 0.5);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.06),
+    0 4px 20px hsl(0 0% 0% / 0.3);
 }
 
-/* ── Hard shadow (brutalist depth) ───────────────────── */
-.shadow-hard { box-shadow: 4px 4px 0px hsl(var(--foreground)); }
-.shadow-hard-red { box-shadow: 4px 4px 0px hsl(var(--primary)); }
+/* ── Clean portfolio theme ─────────────────────────── */
+.theme-clean {
+  --radius: 0.5rem;
+  --background: 0 0% 99%;
+  --foreground: 240 10% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 8%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 46%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 240 10% 8%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100dvh;
+}
+.dark .theme-clean {
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 95%;
+  --border: 0 0% 14%;
+  --input: 0 0% 14%;
+  --muted: 0 0% 8%;
+  --muted-foreground: 0 0% 52%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 95%;
+}
+.theme-clean .pf-section {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-top: 2rem;
+  margin-bottom: 0;
+}
+.theme-clean .pf-section + .pf-section {
+  border-top: 1px solid hsl(var(--border));
+}
+.theme-clean .pf-section > div:first-child,
+.theme-clean .pf-section > header:first-child {
+  background: transparent;
+  border-bottom: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* Tighten bottom padding on last section */
+.theme-clean main > .pf-section:last-child {
+  padding-bottom: 1rem;
+}
 
-/* ── Utility: label style ─────────────────────────────── */
-.label {
-  @apply font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground;
+/* ── Editorial portfolio theme ─────────────────────── */
+.theme-editorial {
+  --radius: 0;
+  --background: 38 20% 97%;
+  --foreground: 20 12% 8%;
+  --card: 38 20% 99%;
+  --card-foreground: 20 12% 8%;
+  --border: 35 12% 82%;
+  --input: 35 12% 82%;
+  --muted: 38 18% 93%;
+  --muted-foreground: 25 8% 44%;
+  --secondary: 38 18% 93%;
+  --secondary-foreground: 20 12% 8%;
+  --primary: 16 82% 46%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 16 82% 46%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 16 82% 46%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100dvh;
+}
+.dark .theme-editorial {
+  --background: 20 10% 6%;
+  --foreground: 35 12% 90%;
+  --card: 20 10% 9%;
+  --card-foreground: 35 12% 90%;
+  --border: 25 8% 18%;
+  --input: 25 8% 18%;
+  --muted: 20 10% 9%;
+  --muted-foreground: 30 8% 52%;
+  --secondary: 20 10% 11%;
+  --secondary-foreground: 35 12% 90%;
+  --primary: 16 82% 58%;
+  --primary-foreground: 20 10% 6%;
+  --accent: 16 82% 58%;
+  --accent-foreground: 20 10% 6%;
+  --ring: 16 82% 58%;
+}
+.theme-editorial .pf-section {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
+.theme-editorial .pf-section > div:first-child,
+.theme-editorial .pf-section > header:first-child {
+  background: transparent;
+  border-bottom-width: 2px;
+  border-bottom-color: hsl(var(--foreground));
+  padding-top: 1.25rem;
+}
+.theme-editorial .pf-section > div:first-child .label,
+.theme-editorial .pf-section > header:first-child .label {
+  color: hsl(var(--foreground));
+  font-weight: 700;
+  letter-spacing: 0.2em;
 }

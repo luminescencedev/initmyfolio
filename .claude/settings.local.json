@@ -11,7 +11,9 @@
       "Bash(npx:*)",
       "Bash(npm:*)",
       "Bash(node_modules/.bin/tsc --noEmit -p apps/web/tsconfig.json)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(curl -s http://localhost:3001/auth/github -I)",
+      "Bash(curl -s http://localhost:3000 -I)"
     ]
   }
 }

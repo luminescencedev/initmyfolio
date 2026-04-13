@@ -375,11 +375,12 @@ export function CustomizePanel({ user, token, onSettingsSaved }: Props) {
             <div className="label">LAYOUT VARIANT</div>
             <OptionGroup
               value={local.layoutVariant}
-              options={["brutalist", "terminal", "minimal"] as const}
+              options={["brutalist", "glass", "clean", "editorial"] as const}
               labels={{
                 brutalist: "BRUTALIST",
-                terminal: "TERMINAL",
-                minimal: "MINIMAL",
+                glass: "GLASS",
+                clean: "CLEAN",
+                editorial: "EDITORIAL",
               }}
               onChange={(v) => set("layoutVariant", v)}
             />
