@@ -2,17 +2,16 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { GithubLogo, WarningCircle, ArrowLeft } from "@phosphor-icons/react";
-import { Code } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, ArrowRight, WarningCircle, ArrowLeft } from "@phosphor-icons/react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
 
-const ERROR_MESSAGES: Record<string, string> = {
-  oauth_failed: "GitHub OAuth failed. Please try again.",
-  token_exchange_failed: "Could not authenticate with GitHub.",
-  server_error: "Something went wrong on our end.",
+const ERRORS: Record<string, string> = {
+  oauth_failed: "GITHUB OAUTH FAILED. PLEASE RETRY.",
+  token_exchange_failed: "TOKEN EXCHANGE FAILED. PLEASE RETRY.",
+  server_error: "SERVER ERROR. PLEASE RETRY.",
 };
 
 function LoginContent() {
@@ -22,48 +21,77 @@ function LoginContent() {
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back
+      {/* Top bar */}
+      <div className="border-b border-border px-6 py-3 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 label hover:text-foreground transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          INITMYFOLIO
         </Link>
         <ThemeToggle />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-[360px]">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-11 h-11 bg-foreground rounded-2xl flex items-center justify-center mb-5 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.2)]">
-              <Code weight="bold" className="w-5 h-5 text-background" />
+      {/* Terminal card */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-[380px] border border-border">
+          {/* Terminal header */}
+          <div className="border-b border-border px-4 py-2 bg-muted flex items-center justify-between">
+            <span className="label">[ AUTHENTICATION TERMINAL ]</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-primary rounded-full" />
+              <span className="label text-primary">ONLINE</span>
             </div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight">Sign in to InitMyFolio</h1>
-            <p className="text-sm text-muted-foreground mt-1.5 text-center max-w-[28ch]">
-              We only request read access to your public GitHub data.
-            </p>
           </div>
 
-          {error && (
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-destructive/25 bg-destructive/8 text-destructive text-sm mb-4">
-              <WarningCircle weight="fill" className="w-4 h-4 mt-0.5 shrink-0" />
-              <span>{ERROR_MESSAGES[error] ?? "An error occurred."}</span>
+          <div className="p-8">
+            {/* Brand */}
+            <div className="mb-8">
+              <div className="font-display uppercase tracking-tighter text-foreground text-3xl mb-1">INITMYFOLIO</div>
+              <div className="label">PORTFOLIO GENERATION SYSTEM · REV 1.0</div>
             </div>
-          )}
 
-          <button
-            onClick={() => { setLoading(true); window.location.href = `${API_URL}/auth/github`; }}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-foreground text-background rounded-xl font-semibold text-sm hover:bg-foreground/90 transition-all duration-200 ease-spring active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_1px_0_rgba(255,255,255,0.1)_inset]"
-          >
-            <GithubLogo weight="bold" className="w-4 h-4" />
-            {loading ? "Redirecting…" : "Continue with GitHub"}
-          </button>
+            {/* Data lines */}
+            <div className="space-y-1.5 mb-6 border border-border p-4 bg-muted">
+              {[
+                ["PROTOCOL", "GITHUB OAUTH 2.0"],
+                ["SCOPE", "READ:USER // USER:EMAIL"],
+                ["ACCESS", "PUBLIC DATA ONLY"],
+                ["SESSION", "JWT / 30D TTL"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-center gap-3">
+                  <span className="label w-20 shrink-0">{k}</span>
+                  <span className="label text-foreground">{v}</span>
+                </div>
+              ))}
+            </div>
 
-          <p className="text-xs text-muted-foreground text-center mt-6 leading-relaxed">
-            By continuing, you agree to our{" "}
-            <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">Terms</Link>
-            {" "}and{" "}
-            <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">Privacy Policy</Link>.
-          </p>
+            {/* Error */}
+            {error && (
+              <div className="flex items-start gap-2.5 border border-primary p-3 mb-4 bg-primary/5">
+                <WarningCircle weight="fill" className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <span className="label text-primary">{ERRORS[error] ?? "AUTH ERROR. RETRY."}</span>
+              </div>
+            )}
+
+            {/* CTA */}
+            <button
+              onClick={() => { setLoading(true); window.location.href = `${API_URL}/auth/github`; }}
+              disabled={loading}
+              className="w-full flex items-center justify-between px-5 py-3.5 bg-foreground text-background border border-foreground text-sm font-mono uppercase tracking-wider hover:bg-primary hover:border-primary transition-colors duration-200 active:scale-[0.98] disabled:opacity-50 group"
+            >
+              <div className="flex items-center gap-2.5">
+                <GithubLogo weight="bold" className="w-4 h-4" />
+                {loading ? "CONNECTING…" : "AUTHENTICATE VIA GITHUB"}
+              </div>
+              {!loading && <ArrowRight weight="bold" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
+            </button>
+
+            <p className="label text-center mt-5">
+              BY CONTINUING YOU ACCEPT OUR{" "}
+              <Link href="/terms" className="text-foreground underline underline-offset-2">TERMS</Link>
+              {" "}AND{" "}
+              <Link href="/privacy" className="text-foreground underline underline-offset-2">PRIVACY POLICY</Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
