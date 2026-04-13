@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { GithubLogo, ArrowRight, WarningCircle, ArrowLeft } from "@phosphor-icons/react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  GithubLogo,
+  ArrowRight,
+  WarningCircle,
+  ArrowLeft,
+  Spinner,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getCurrentUser } from "@/lib/api";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
 
@@ -16,14 +23,46 @@ const ERRORS: Record<string, string> = {
 
 function LoginContent() {
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const error = searchParams.get("error");
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setChecking(false);
+      return;
+    }
+    getCurrentUser(token).then((user) => {
+      if (user) {
+        router.replace("/dashboard");
+      } else {
+        localStorage.removeItem("auth_token");
+        setChecking(false);
+      }
+    });
+  }, [router]);
+
+  if (checking) {
+    return (
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2.5 label">
+          <Spinner weight="bold" className="w-4 h-4 animate-spin" />
+          CHECKING SESSION…
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
       {/* Top bar */}
       <div className="border-b border-border px-6 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 label hover:text-foreground transition-colors">
+        <Link
+          href="/"
+          className="flex items-center gap-2 label hover:text-foreground transition-colors"
+        >
           <ArrowLeft className="w-3.5 h-3.5" />
           INITMYFOLIO
         </Link>
@@ -45,7 +84,9 @@ function LoginContent() {
           <div className="p-8">
             {/* Brand */}
             <div className="mb-8">
-              <div className="font-display uppercase tracking-tighter text-foreground text-3xl mb-1">INITMYFOLIO</div>
+              <div className="font-display uppercase tracking-tighter text-foreground text-3xl mb-1">
+                INITMYFOLIO
+              </div>
               <div className="label">PORTFOLIO GENERATION SYSTEM · REV 1.0</div>
             </div>
 
@@ -67,14 +108,22 @@ function LoginContent() {
             {/* Error */}
             {error && (
               <div className="flex items-start gap-2.5 border border-primary p-3 mb-4 bg-primary/5">
-                <WarningCircle weight="fill" className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span className="label text-primary">{ERRORS[error] ?? "AUTH ERROR. RETRY."}</span>
+                <WarningCircle
+                  weight="fill"
+                  className="w-4 h-4 text-primary mt-0.5 shrink-0"
+                />
+                <span className="label text-primary">
+                  {ERRORS[error] ?? "AUTH ERROR. RETRY."}
+                </span>
               </div>
             )}
 
             {/* CTA */}
             <button
-              onClick={() => { setLoading(true); window.location.href = `${API_URL}/auth/github`; }}
+              onClick={() => {
+                setLoading(true);
+                window.location.href = `${API_URL}/auth/github`;
+              }}
               disabled={loading}
               className="w-full flex items-center justify-between px-5 py-3.5 bg-foreground text-background border border-foreground text-sm font-mono uppercase tracking-wider hover:bg-primary hover:border-primary transition-colors duration-200 active:scale-[0.98] disabled:opacity-50 group"
             >
@@ -82,14 +131,29 @@ function LoginContent() {
                 <GithubLogo weight="bold" className="w-4 h-4" />
                 {loading ? "CONNECTING…" : "AUTHENTICATE VIA GITHUB"}
               </div>
-              {!loading && <ArrowRight weight="bold" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
+              {!loading && (
+                <ArrowRight
+                  weight="bold"
+                  className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                />
+              )}
             </button>
 
             <p className="label text-center mt-5">
               BY CONTINUING YOU ACCEPT OUR{" "}
-              <Link href="/terms" className="text-foreground underline underline-offset-2">TERMS</Link>
-              {" "}AND{" "}
-              <Link href="/privacy" className="text-foreground underline underline-offset-2">PRIVACY POLICY</Link>
+              <Link
+                href="/terms"
+                className="text-foreground underline underline-offset-2"
+              >
+                TERMS
+              </Link>{" "}
+              AND{" "}
+              <Link
+                href="/privacy"
+                className="text-foreground underline underline-offset-2"
+              >
+                PRIVACY POLICY
+              </Link>
             </p>
           </div>
         </div>
@@ -99,5 +163,9 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return <Suspense><LoginContent /></Suspense>;
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  );
 }

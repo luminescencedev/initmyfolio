@@ -49,7 +49,7 @@ const ACCENT_DOT: Record<string, string> = {
   sky: "bg-[hsl(200_85%_50%)]",
 };
 
-/* â”€â”€â”€ Skeleton row â”€â”€â”€ */
+/* ─── Skeleton row ─── */
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3 border-b border-border animate-pulse">
@@ -60,7 +60,7 @@ function SkeletonRow() {
   );
 }
 
-/* â”€â”€â”€ Portfolio preview iframe â”€â”€â”€ */
+/* ─── Portfolio preview iframe ─── */
 function PortfolioPreview({ url }: { url: string }) {
   const [loaded, setLoaded] = useState(false);
   const [key, setKey] = useState(0);
@@ -94,14 +94,14 @@ function PortfolioPreview({ url }: { url: string }) {
       </div>
 
       <div
-        className="relative w-full overflow-hidden bg-background"
+        className="relative w-full overflow-hidden bg-background flex justify-center"
         style={{ height: "480px" }}
       >
         {!loaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted/40 z-10">
             <div className="w-4 h-4 border-2 border-foreground/20 border-t-foreground animate-spin" />
             <span className="label text-muted-foreground">
-              LOADING PREVIEWâ€¦
+              LOADING PREVIEW…
             </span>
           </div>
         )}
@@ -114,16 +114,17 @@ function PortfolioPreview({ url }: { url: string }) {
             width: "1200px",
             height: "800px",
             transform: "scale(0.6)",
-            transformOrigin: "top left",
+            transformOrigin: "top center",
             border: "none",
             pointerEvents: "none",
+            flexShrink: 0,
           }}
         />
       </div>
 
       <div className="border-t border-border px-4 py-2 flex items-center justify-between gap-4">
         <span className="label text-muted-foreground text-[9px]">
-          PREVIEW â€” CACHE MAY TAKE UP TO 1H TO REFLECT CHANGES
+          PREVIEW — CACHE MAY TAKE UP TO 1H TO REFLECT CHANGES
         </span>
         <Link
           href="/settings"
@@ -137,7 +138,7 @@ function PortfolioPreview({ url }: { url: string }) {
   );
 }
 
-/* â”€â”€â”€ Settings row â”€â”€â”€ */
+/* ─── Settings row ─── */
 function SettingRow({
   label,
   value,
@@ -153,7 +154,7 @@ function SettingRow({
   );
 }
 
-/* â”€â”€â”€ Main dashboard content â”€â”€â”€ */
+/* ─── Main dashboard content ─── */
 function DashboardContent() {
   const [user, setUser] = useState<PortfolioUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -206,7 +207,7 @@ function DashboardContent() {
     setIsSyncing(false);
     if (result.ok) {
       setSyncMessage({
-        text: "SYNC COMPLETE â€” DATA UPDATED.",
+        text: "SYNC COMPLETE — DATA UPDATED.",
         type: "success",
       });
       const updated = await getCurrentUser(token);
@@ -215,7 +216,7 @@ function DashboardContent() {
       setSyncAvailableAt(result.availableAt);
       const mins = Math.ceil((result.retryAfter ?? 300) / 60);
       setSyncMessage({
-        text: `RATE LIMITED â€” NEXT SYNC IN ${mins}M.`,
+        text: `RATE LIMITED — NEXT SYNC IN ${mins}M.`,
         type: "warn",
       });
     } else {
@@ -229,7 +230,7 @@ function DashboardContent() {
       : `https://${user.username}.initmyfolio.com`
     : "#";
 
-  /* â”€â”€ Skeleton â”€â”€ */
+  /* ── Skeleton ── */
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background">
@@ -277,7 +278,7 @@ function DashboardContent() {
 
   return (
     <div className="min-h-[100dvh] bg-background">
-      {/* â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── HEADER ─────────────────────────────── */}
       <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -321,7 +322,7 @@ function DashboardContent() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── PROFILE ─────────────────────────── */}
         <div className="border border-border mb-0">
           <div className="border-b border-border p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -360,7 +361,7 @@ function DashboardContent() {
                   weight="bold"
                   className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`}
                 />
-                {isSyncing ? "SYNCINGâ€¦" : "SYNC NOW"}
+                {isSyncing ? "SYNCING…" : "SYNC NOW"}
               </button>
             </div>
           </div>
@@ -467,10 +468,10 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* â”€â”€ PORTFOLIO PREVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── PORTFOLIO PREVIEW ──────────────── */}
         <PortfolioPreview url={portfolioUrl} />
 
-        {/* â”€â”€ MAIN GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── MAIN GRID ─────────────────────── */}
         <div className="grid lg:grid-cols-[1fr_280px] border-l border-r border-b border-border">
           {/* Repos */}
           <div className="lg:border-r border-border">
@@ -705,7 +706,7 @@ function DashboardContent() {
                 >
                   <div className="flex items-center gap-2">
                     <Lightning weight="bold" className="w-3.5 h-3.5" />
-                    UPGRADE â€” $7/MO
+                    UPGRADE — $7/MO
                   </div>
                   <ArrowRight
                     weight="bold"
@@ -729,4 +730,3 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
-("use client");

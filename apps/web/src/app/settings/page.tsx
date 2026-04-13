@@ -248,7 +248,7 @@ function SectionHeader({ id, label }: { id: string; label: string }) {
   return (
     <div
       id={id}
-      className="border-b border-border px-6 py-2.5 bg-muted/50 sticky top-[48px] z-10"
+      className="border-b border-border px-6 py-2.5 bg-background sticky top-[48px] z-10"
     >
       <span className="label text-[9px] tracking-widest">{label}</span>
     </div>
