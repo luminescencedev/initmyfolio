@@ -90,22 +90,26 @@ export default async function PortfolioPage({ params }: Props) {
             {/* Massive name */}
             <div className="overflow-hidden">
               <h1
-                className="font-display uppercase tracking-tighter text-foreground leading-[0.85] pb-6"
-                style={{ fontSize: "clamp(3rem, 12vw, 11rem)" }}
+                className="font-display uppercase tracking-tighter text-foreground leading-[0.85] pb-6 break-words"
+                style={{ fontSize: "clamp(2.25rem, 11vw, 11rem)" }}
               >
                 {displayName}
               </h1>
             </div>
 
             {/* Meta strip */}
-            <div className="border-t border-border py-4 flex flex-wrap gap-4 items-center">
-              {user.avatarUrl && (
-                <Image src={user.avatarUrl} alt={displayName} width={32} height={32} className="rounded-full border border-border" />
-              )}
-              {user.bio && (
-                <p className="text-xs text-muted-foreground max-w-[48ch]">{user.bio}</p>
-              )}
-              <div className="flex items-center gap-4 ml-auto flex-wrap">
+            <div className="border-t border-border py-4 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:items-center">
+              {/* Avatar + bio row */}
+              <div className="flex items-start gap-3 sm:contents">
+                {user.avatarUrl && (
+                  <Image src={user.avatarUrl} alt={displayName} width={32} height={32} className="rounded-full border border-border shrink-0" />
+                )}
+                {user.bio && (
+                  <p className="text-xs text-muted-foreground">{user.bio}</p>
+                )}
+              </div>
+              {/* Links row */}
+              <div className="flex items-center gap-4 flex-wrap sm:ml-auto">
                 {user.location && (
                   <span className="flex items-center gap-1.5 label">
                     <MapPin weight="regular" className="w-3.5 h-3.5" />{user.location}
@@ -138,18 +142,23 @@ export default async function PortfolioPage({ params }: Props) {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           {/* ── STATS ────────────────────────────── */}
           {!hideSections.includes("stats") && (
-            <div className="border border-border grid grid-cols-2 sm:grid-cols-4 divide-x divide-border mb-8">
-              {[
-                { label: "REPOSITORIES", value: user.githubData?.profile?.public_repos ?? 0 },
-                { label: "TOTAL STARS", value: user.githubData?.totalStars ?? 0 },
-                { label: "TOTAL FORKS", value: user.githubData?.totalForks ?? 0 },
-                { label: "FOLLOWERS", value: user.githubData?.profile?.followers ?? 0 },
-              ].map((s, i) => (
-                <div key={s.label} className={`px-5 py-5 text-center ${i >= 2 ? "border-t sm:border-t-0 border-border" : ""}`}>
-                  <div className="font-mono text-3xl font-bold text-foreground">{formatNumber(s.value)}</div>
-                  <div className="label mt-1.5">{s.label}</div>
-                </div>
-              ))}
+            <div className="border border-border grid grid-cols-2 sm:grid-cols-4 mb-8">
+              <div className="px-4 py-5 text-center border-r border-b sm:border-b-0 border-border">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(user.githubData?.profile?.public_repos ?? 0)}</div>
+                <div className="label mt-1.5 text-[9px] sm:text-[10px]">REPOS</div>
+              </div>
+              <div className="px-4 py-5 text-center sm:border-r border-b sm:border-b-0 border-border">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(user.githubData?.totalStars ?? 0)}</div>
+                <div className="label mt-1.5 text-[9px] sm:text-[10px]">STARS</div>
+              </div>
+              <div className="px-4 py-5 text-center border-r border-border">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(user.githubData?.totalForks ?? 0)}</div>
+                <div className="label mt-1.5 text-[9px] sm:text-[10px]">FORKS</div>
+              </div>
+              <div className="px-4 py-5 text-center">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(user.githubData?.profile?.followers ?? 0)}</div>
+                <div className="label mt-1.5 text-[9px] sm:text-[10px]">FOLLOWERS</div>
+              </div>
             </div>
           )}
 
@@ -158,10 +167,10 @@ export default async function PortfolioPage({ params }: Props) {
             <div className="border border-border mb-8">
               <div className="border-b border-border px-4 py-2.5 bg-muted flex items-center justify-between">
                 <span className="label">[ REPOSITORIES ]</span>
-                <span className="label">{allRepos.length} TOTAL / SORTED BY ★</span>
+                <span className="label">{allRepos.length} TOTAL</span>
               </div>
 
-              {/* Table header */}
+              {/* Desktop table header only */}
               <div className="hidden sm:grid grid-cols-[1fr_100px_80px_70px] border-b border-border px-4 py-2 bg-muted/50">
                 <span className="label">NAME</span>
                 <span className="label">LANGUAGE</span>
@@ -171,36 +180,47 @@ export default async function PortfolioPage({ params }: Props) {
 
               {displayRepos.map((repo, i) => (
                 <a key={repo.id} href={repo.html_url} target="_blank" rel="noopener noreferrer"
-                  className={`grid sm:grid-cols-[1fr_100px_80px_70px] gap-2 sm:gap-0 px-4 py-4 items-start sm:items-center hover:bg-muted transition-colors ${i < displayRepos.length - 1 ? "border-b border-border" : ""} group`}>
-                  <div className="min-w-0">
+                  className={`block px-4 py-3.5 hover:bg-muted transition-colors ${i < displayRepos.length - 1 ? "border-b border-border" : ""} group sm:grid sm:grid-cols-[1fr_100px_80px_70px] sm:items-center sm:py-3`}>
+
+                  {/* Name + description (both layouts) */}
+                  <div className="min-w-0 mb-2 sm:mb-0">
                     <div className="text-sm font-mono font-bold text-primary group-hover:underline truncate">{repo.name}</div>
                     {repo.description && (
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{repo.description}</p>
                     )}
-                    {repo.topics && repo.topics.length > 0 && (
-                      <div className="flex gap-2 mt-2 flex-wrap">
-                        {repo.topics.slice(0, 3).map((t) => (
-                          <span key={t} className="px-1.5 py-0.5 border border-border text-[9px] font-mono uppercase tracking-wider">{t}</span>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {repo.language && (
-                      <>
-                        <div className="w-2 h-2 shrink-0" style={{ backgroundColor: getLanguageColor(repo.language) }} />
-                        <span className="text-[11px] font-mono text-muted-foreground">{repo.language}</span>
-                      </>
-                    )}
+
+                  {/* Mobile bottom row: lang + stars + forks inline */}
+                  <div className="flex items-center gap-3 sm:contents text-muted-foreground">
+                    {/* Language — shown in its own col on desktop */}
+                    <div className="flex items-center gap-1.5 sm:col-start-2">
+                      {repo.language && (
+                        <>
+                          <div className="w-2 h-2 shrink-0" style={{ backgroundColor: getLanguageColor(repo.language) }} />
+                          <span className="text-[11px] font-mono text-muted-foreground">{repo.language}</span>
+                        </>
+                      )}
+                    </div>
+                    {/* Stars */}
+                    <div className="flex items-center gap-1 sm:justify-end">
+                      <Star weight="regular" className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                      <span className="text-xs sm:text-[10px] font-mono">{formatNumber(repo.stargazers_count)}</span>
+                    </div>
+                    {/* Forks */}
+                    <div className="flex items-center gap-1 sm:justify-end">
+                      <GitFork weight="regular" className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+                      <span className="text-xs sm:text-[10px] font-mono">{formatNumber(repo.forks_count)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                    <Star weight="regular" className="w-3.5 h-3.5" />
-                    <span className="text-xs font-mono">{formatNumber(repo.stargazers_count)}</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                    <GitFork weight="regular" className="w-3.5 h-3.5" />
-                    <span className="text-xs font-mono">{formatNumber(repo.forks_count)}</span>
-                  </div>
+
+                  {/* Topics — mobile only, below the stats */}
+                  {repo.topics && repo.topics.length > 0 && (
+                    <div className="flex gap-1.5 mt-2 flex-wrap sm:hidden">
+                      {repo.topics.slice(0, 3).map((t) => (
+                        <span key={t} className="px-1.5 py-0.5 border border-border text-[9px] font-mono uppercase tracking-wider">{t}</span>
+                      ))}
+                    </div>
+                  )}
                 </a>
               ))}
             </div>
@@ -212,23 +232,26 @@ export default async function PortfolioPage({ params }: Props) {
               <div className="border-b border-border px-4 py-2.5 bg-muted">
                 <span className="label">[ LANGUAGE DISTRIBUTION ]</span>
               </div>
-              <div className="p-6">
+              <div>
                 {/* Full-width bar */}
-                <div className="flex w-full h-3 mb-6">
+                <div className="flex w-full h-2.5 border-b border-border">
                   {topLanguages.map(({ lang, pct }) => (
                     <div key={lang} style={{ width: `${pct}%`, backgroundColor: getLanguageColor(lang) }} title={`${lang}: ${pct}%`} />
                   ))}
                 </div>
 
-                {/* Legend grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-0 border border-border divide-x divide-y divide-border">
-                  {topLanguages.map(({ lang, pct }) => (
-                    <div key={lang} className="flex flex-col p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: getLanguageColor(lang) }} />
-                        <span className="text-[11px] font-mono text-foreground truncate">{lang}</span>
+                {/* Language list — clean, works on all sizes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 divide-border">
+                  {topLanguages.map(({ lang, pct }, i) => (
+                    <div key={lang} className={`flex items-center justify-between px-5 py-3.5 border-b border-border ${
+                      // On sm (2-col), add right border to left column
+                      i % 2 === 0 ? "sm:border-r" : ""
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 shrink-0" style={{ backgroundColor: getLanguageColor(lang) }} />
+                        <span className="text-sm font-mono text-foreground">{lang}</span>
                       </div>
-                      <div className="font-mono text-base font-bold text-foreground">{pct}%</div>
+                      <span className="font-mono text-xl font-bold text-foreground">{pct}%</span>
                     </div>
                   ))}
                 </div>

@@ -239,9 +239,9 @@ export default function LandingPage() {
                 ["HOURLY", "AUTO-REFRESH"],
                 ["MIT", "LICENSE"],
               ].map(([v, l]) => (
-                <div key={l} className="pr-6">
-                  <div className="font-mono text-lg font-bold text-foreground">{v}</div>
-                  <div className="label mt-0.5">{l}</div>
+                <div key={l} className="pr-4">
+                  <div className="font-mono text-base sm:text-lg font-bold text-foreground">{v}</div>
+                  <div className="label mt-0.5 text-[9px] sm:text-[10px]">{l}</div>
                 </div>
               ))}
             </div>
@@ -297,7 +297,7 @@ export default function LandingPage() {
               className={`grid md:grid-cols-2 border-b border-border ${i === 0 ? "border-t" : ""}`}
             >
               {step.align === "right" && <div className="hidden md:block border-r border-border" />}
-              <div className={`p-8 md:p-12 ${step.align === "right" ? "md:border-l-0" : "border-r md:border-r border-border"}`}>
+              <div className={`p-6 md:p-12 ${step.align === "right" ? "md:border-l-0" : "md:border-r border-border"}`}>
                 <div className="flex items-start gap-5">
                   <span className="font-mono text-5xl font-bold text-border leading-none shrink-0">{step.n}</span>
                   <div>
@@ -367,7 +367,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-0 border border-border">
-          <div className="border-b md:border-b-0 md:border-r border-border">
+          <div className="border-b md:border-b-0 md:border-r border-border pb-2 md:pb-0">
             <PricingCard
               tier="[ FREE ]"
               price="$0"
@@ -414,7 +414,7 @@ export default function LandingPage() {
 
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
-        <div className="border border-border grid md:grid-cols-[1fr_auto] items-center gap-8 p-10 md:p-14">
+        <div className="border border-border grid md:grid-cols-[1fr_auto] items-center gap-6 p-8 md:p-14">
           <div>
             <div className="label mb-3">[ READY? ]</div>
             <h2 className="font-display uppercase tracking-tighter text-foreground" style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}>

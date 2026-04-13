@@ -171,10 +171,10 @@ function DashboardContent() {
           </div>
 
           {/* Bio + meta */}
-          {(user.bio || user.location || user.website) && (
-            <div className="border-b border-border px-5 py-3 flex flex-wrap gap-4">
-              {user.bio && <span className="text-xs text-muted-foreground max-w-prose">{user.bio}</span>}
-              <div className="flex items-center gap-4 ml-auto">
+          {(user.bio || user.location || user.website || user.lastSyncedAt) && (
+            <div className="border-b border-border px-5 py-3 space-y-2">
+              {user.bio && <p className="text-xs text-muted-foreground">{user.bio}</p>}
+              <div className="flex items-center gap-4 flex-wrap">
                 {user.location && (
                   <span className="flex items-center gap-1.5 label">
                     <MapPin weight="regular" className="w-3.5 h-3.5" />{user.location}
@@ -224,13 +224,13 @@ function DashboardContent() {
           </div>
 
           {/* Portfolio URL */}
-          <div className="px-5 py-3 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <span className="label">YOUR PORTFOLIO</span>
-              <a href={portfolioUrl} target="_blank" className="text-xs font-mono text-primary hover:underline underline-offset-2">{portfolioUrl}</a>
+          <div className="px-5 py-3 space-y-1.5 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
+            <div className="min-w-0">
+              <div className="label mb-0.5">YOUR PORTFOLIO</div>
+              <a href={portfolioUrl} target="_blank" className="text-xs font-mono text-primary hover:underline underline-offset-2 break-all">{portfolioUrl}</a>
             </div>
             <a href={portfolioUrl} target="_blank"
-              className="flex items-center gap-1.5 label hover:text-foreground transition-colors">
+              className="flex items-center gap-1.5 label hover:text-foreground transition-colors shrink-0">
               <ArrowSquareOut weight="regular" className="w-3.5 h-3.5" />
               OPEN
             </a>
@@ -240,7 +240,7 @@ function DashboardContent() {
         {/* ── MAIN GRID: repos + languages ──────── */}
         <div className="grid lg:grid-cols-[1fr_280px] border-l border-r border-b border-border">
           {/* Repos */}
-          <div className="border-r border-border">
+          <div className="lg:border-r border-border">
             <div className="border-b border-border px-4 py-2.5 flex items-center justify-between bg-muted">
               <span className="label">[ REPOSITORIES ]</span>
               <span className="label">{user.githubData?.profile?.public_repos ?? 0} TOTAL</span>
@@ -259,8 +259,8 @@ function DashboardContent() {
               </div>
             ) : (
               <>
-                {/* Table header */}
-                <div className="grid grid-cols-[1fr_80px_60px_60px] border-b border-border px-4 py-2 bg-muted/50">
+                {/* Desktop table header only */}
+                <div className="hidden sm:grid grid-cols-[1fr_80px_60px_60px] border-b border-border px-4 py-2 bg-muted/50">
                   <span className="label">NAME</span>
                   <span className="label">LANG</span>
                   <span className="label text-right">STARS</span>
@@ -268,28 +268,32 @@ function DashboardContent() {
                 </div>
                 {topRepos.map((repo, i) => (
                   <a key={repo.id} href={repo.html_url} target="_blank"
-                    className={`grid grid-cols-[1fr_80px_60px_60px] px-4 py-3 items-center hover:bg-muted transition-colors ${i < topRepos.length - 1 ? "border-b border-border" : ""} group`}>
-                    <div className="min-w-0">
+                    className={`block px-4 py-3 hover:bg-muted transition-colors ${i < topRepos.length - 1 ? "border-b border-border" : ""} group sm:grid sm:grid-cols-[1fr_80px_60px_60px] sm:items-center`}>
+                    {/* Name */}
+                    <div className="min-w-0 mb-1.5 sm:mb-0">
                       <div className="text-xs font-mono text-primary group-hover:underline truncate">{repo.name}</div>
                       {repo.description && (
-                        <div className="text-[10px] text-muted-foreground truncate mt-0.5 hidden sm:block">{repo.description}</div>
+                        <div className="text-[10px] text-muted-foreground truncate mt-0.5">{repo.description}</div>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      {repo.language && (
-                        <>
-                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getLanguageColor(repo.language) }} />
-                          <span className="text-[10px] font-mono text-muted-foreground truncate">{repo.language}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                      <Star weight="regular" className="w-3 h-3" />
-                      <span className="text-[10px] font-mono">{formatNumber(repo.stargazers_count)}</span>
-                    </div>
-                    <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                      <GitFork weight="regular" className="w-3 h-3" />
-                      <span className="text-[10px] font-mono">{formatNumber(repo.forks_count)}</span>
+                    {/* Mobile: stats in a single row */}
+                    <div className="flex items-center gap-3 sm:contents text-muted-foreground">
+                      <div className="flex items-center gap-1.5 sm:col-start-2">
+                        {repo.language && (
+                          <>
+                            <div className="w-2 h-2 shrink-0" style={{ backgroundColor: getLanguageColor(repo.language) }} />
+                            <span className="text-[10px] font-mono text-muted-foreground truncate">{repo.language}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 sm:justify-end">
+                        <Star weight="regular" className="w-3 h-3" />
+                        <span className="text-[10px] font-mono">{formatNumber(repo.stargazers_count)}</span>
+                      </div>
+                      <div className="flex items-center gap-1 sm:justify-end">
+                        <GitFork weight="regular" className="w-3 h-3" />
+                        <span className="text-[10px] font-mono">{formatNumber(repo.forks_count)}</span>
+                      </div>
                     </div>
                   </a>
                 ))}
