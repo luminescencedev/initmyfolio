@@ -1,75 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Github, Code2, AlertCircle } from "lucide-react";
-import { Suspense } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { GithubLogo, WarningCircle, ArrowLeft } from "@phosphor-icons/react";
+import { Code } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
 
+const ERROR_MESSAGES: Record<string, string> = {
+  oauth_failed: "GitHub OAuth failed. Please try again.",
+  token_exchange_failed: "Could not authenticate with GitHub.",
+  server_error: "Something went wrong on our end.",
+};
+
 function LoginContent() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
-  const errorMessages: Record<string, string> = {
-    oauth_failed: "GitHub OAuth failed. Please try again.",
-    token_exchange_failed: "Failed to authenticate with GitHub. Please try again.",
-    server_error: "Server error. Please try again later.",
-  };
-
-  const handleLogin = () => {
-    setIsLoading(true);
-    window.location.href = `${API_URL}/auth/github`;
-  };
-
   return (
-    <div className="min-h-screen bg-[#0d1117] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-            <Code2 className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-bold text-white">InitMyFolio</span>
-        </div>
+    <div className="min-h-[100dvh] bg-background flex flex-col">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+        <ThemeToggle />
+      </div>
 
-        {/* Card */}
-        <div className="bg-[#161b22] border border-white/10 rounded-2xl p-8 text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Create your portfolio
-          </h1>
-          <p className="text-gray-400 mb-8">
-            Connect your GitHub account to generate a beautiful portfolio in seconds.
-          </p>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-[360px]">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-11 h-11 bg-foreground rounded-2xl flex items-center justify-center mb-5 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.2)]">
+              <Code weight="bold" className="w-5 h-5 text-background" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Sign in to InitMyFolio</h1>
+            <p className="text-sm text-muted-foreground mt-1.5 text-center max-w-[28ch]">
+              We only request read access to your public GitHub data.
+            </p>
+          </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessages[error] ?? "An error occurred. Please try again."}</span>
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-destructive/25 bg-destructive/8 text-destructive text-sm mb-4">
+              <WarningCircle weight="fill" className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{ERROR_MESSAGES[error] ?? "An error occurred."}</span>
             </div>
           )}
 
           <button
-            onClick={handleLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            onClick={() => { setLoading(true); window.location.href = `${API_URL}/auth/github`; }}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-foreground text-background rounded-xl font-semibold text-sm hover:bg-foreground/90 transition-all duration-200 ease-spring active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_1px_0_rgba(255,255,255,0.1)_inset]"
           >
-            <Github className="w-5 h-5" />
-            {isLoading ? "Redirecting to GitHub..." : "Continue with GitHub"}
+            <GithubLogo weight="bold" className="w-4 h-4" />
+            {loading ? "Redirecting…" : "Continue with GitHub"}
           </button>
 
-          <p className="text-xs text-gray-500 mt-6">
-            By signing in, you agree to our Terms of Service and Privacy Policy.
-            We only request read access to your public GitHub data.
+          <p className="text-xs text-muted-foreground text-center mt-6 leading-relaxed">
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">Terms</Link>
+            {" "}and{" "}
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">Privacy Policy</Link>.
           </p>
-        </div>
-
-        {/* Back link */}
-        <div className="text-center mt-6">
-          <a href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
-            ← Back to home
-          </a>
         </div>
       </div>
     </div>
@@ -77,9 +71,5 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginContent />
-    </Suspense>
-  );
+  return <Suspense><LoginContent /></Suspense>;
 }

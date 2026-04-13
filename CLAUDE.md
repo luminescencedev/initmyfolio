@@ -40,12 +40,14 @@ Ports in dev: **API → 3001**, **Web → 3000**.
 ## Environment variables
 
 The `.env` lives at the **monorepo root**. Subpackages load it explicitly:
+
 - `apps/api` dev script prefixes `dotenv -e ../../.env --`
 - `packages/db` scripts all prefix `dotenv -e ../../.env --`
 
 This means running scripts from inside a subdirectory without `dotenv-cli` will fail to find `DATABASE_URL`. Always use the workspace commands from root.
 
 The database requires **two URLs** for Neon (or any serverless PostgreSQL):
+
 - `DATABASE_URL` — pooled connection (used at runtime by Prisma)
 - `DIRECT_URL` — direct connection without pooler (used by `db:push` / `db:migrate`)
 
@@ -81,6 +83,7 @@ GitHub data is **never fetched at request time for public portfolio pages**. The
 - **Public API rate limit**: 60 req/min per IP, in-memory Map in `src/middleware/rateLimit.ts`.
 
 Routes:
+
 ```
 GET  /auth/github                  → redirect to GitHub OAuth
 GET  /auth/github/callback         → exchange code, upsert user, issue JWT, redirect to /dashboard?token=
@@ -113,3 +116,7 @@ POST /api/sync/:username           → trigger sync (Bearer auth or x-internal-k
 ### Docker
 
 `docker-compose.yml` at root: `postgres`, `redis`, `api`, `web`. Both apps have multi-stage Dockerfiles. `NEXT_PUBLIC_*` vars must be passed as `--build-arg` at Docker build time for the web image.
+
+## Design
+
+Pour tout travail UI, lis et applique les règles de @.claude/skills/taste-skill.md

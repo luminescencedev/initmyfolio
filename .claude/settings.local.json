@@ -9,7 +9,9 @@
       "Bash(npx prisma:*)",
       "Bash(node_modules/.bin/prisma migrate:*)",
       "Bash(npx:*)",
-      "Bash(npm:*)"
+      "Bash(npm:*)",
+      "Bash(node_modules/.bin/tsc --noEmit -p apps/web/tsconfig.json)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }
