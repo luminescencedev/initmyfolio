@@ -1,16 +1,27 @@
 import { Hono } from "hono";
+import { createHash, timingSafeEqual } from "crypto";
 import { prisma } from "@initmyfolio/db";
 import { aggregateGitHubData } from "../lib/github.js";
 
 export const syncRouter = new Hono();
+
+/** Timing-safe string comparison — prevents timing-based key enumeration. */
+function safeEqual(a: string, b: string): boolean {
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
+  return timingSafeEqual(ha, hb);
+}
 
 // Internal sync endpoint (can be called by cron or user)
 syncRouter.post("/:username", async (c) => {
   const username = c.req.param("username") as string;
   const internalKey = c.req.header("x-internal-key");
 
-  // Verify internal key for cron calls, or auth token for user calls
-  const isInternalCall = internalKey === process.env["INTERNAL_SYNC_KEY"];
+  // Verify internal key for cron calls, or auth token for user calls.
+  // Use timing-safe comparison to prevent key enumeration via timing attacks.
+  const storedKey = process.env["INTERNAL_SYNC_KEY"] ?? "";
+  const isInternalCall =
+    !!internalKey && !!storedKey && safeEqual(internalKey, storedKey);
   if (!isInternalCall) {
     const authHeader = c.req.header("Authorization");
     const token = authHeader?.replace("Bearer ", "");

@@ -2,9 +2,11 @@ import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(
-  process.env["JWT_SECRET"] ?? "dev-secret-please-change-in-production-32chars",
-);
+const rawSecret = process.env["JWT_SECRET"];
+if (!rawSecret) {
+  throw new Error("[JWT] JWT_SECRET environment variable is required");
+}
+const secret = new TextEncoder().encode(rawSecret);
 
 export async function POST(request: NextRequest) {
   // Verify the user's bearer token so only authenticated users can revalidate,

@@ -41,6 +41,7 @@ import {
 import { purgePersistedStore } from "@/store/store";
 
 const APP_URL = process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000";
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
 
 /* --- Portfolio preview iframe --- */
 function PortfolioPreview({
@@ -167,23 +168,50 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Bootstrap: resolve token, kick off initial fetch if data not yet in store
+  // Bootstrap: resolve token, kick off initial fetch if data not yet in store.
+  // After OAuth the API redirects here with ?code=<one-time-code>.
+  // We exchange that code for a JWT via POST /auth/exchange so the real
+  // JWT token never appears in a URL (browser history / proxy logs).
   useEffect(() => {
-    const urlToken = searchParams.get("token");
+    const urlCode = searchParams.get("code");
     const storedToken = localStorage.getItem("auth_token");
-    const activeToken = urlToken ?? storedToken;
-    if (!activeToken) {
-      router.push("/login");
-      return;
+
+    async function bootstrap() {
+      let activeToken = storedToken;
+
+      if (urlCode) {
+        try {
+          const res = await fetch(`${API_URL}/auth/exchange`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: urlCode }),
+          });
+          if (!res.ok) {
+            router.push("/login?error=auth_failed");
+            return;
+          }
+          const data = (await res.json()) as { token: string };
+          activeToken = data.token;
+          localStorage.setItem("auth_token", activeToken);
+          router.replace("/dashboard"); // Strip ?code= from URL
+        } catch {
+          router.push("/login?error=auth_failed");
+          return;
+        }
+      }
+
+      if (!activeToken) {
+        router.push("/login");
+        return;
+      }
+
+      dispatch(setToken(activeToken));
+      if (!isLoaded) {
+        dispatch(fetchUserRequested(activeToken));
+      }
     }
-    if (urlToken) {
-      localStorage.setItem("auth_token", urlToken);
-      router.replace("/dashboard");
-    }
-    dispatch(setToken(activeToken));
-    if (!isLoaded) {
-      dispatch(fetchUserRequested(activeToken));
-    }
+
+    bootstrap();
     // Run once on mount — isLoaded intentionally excluded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

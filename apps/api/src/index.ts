@@ -10,6 +10,11 @@ import { startCronJobs } from "./cron/index.js";
 
 const app = new Hono();
 
+// Validate critical env vars at startup
+if (process.env["NODE_ENV"] === "production" && !process.env["CORS_ORIGIN"]) {
+  throw new Error("CORS_ORIGIN environment variable is required in production");
+}
+
 // Global middleware
 app.use("*", logger());
 app.use("*", secureHeaders());
@@ -34,9 +39,13 @@ app.route("/api/sync", syncRouter);
 // 404
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 
-// Error handler
+// Error handler — never expose stack traces to clients
 app.onError((err, c) => {
-  console.error("[Error]", err);
+  if (process.env["NODE_ENV"] !== "production") {
+    console.error("[Error]", err);
+  } else {
+    console.error("[Error]", { message: err.message, name: err.name });
+  }
   return c.json({ error: "Internal server error" }, 500);
 });
 

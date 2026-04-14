@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(
-  process.env["JWT_SECRET"] ?? "dev-secret-please-change-in-production-32chars"
-);
+const rawSecret = process.env["JWT_SECRET"];
+if (!rawSecret) {
+  throw new Error("[JWT] JWT_SECRET environment variable is required");
+}
+const secret = new TextEncoder().encode(rawSecret);
 
 export interface JWTPayload {
   userId: string;

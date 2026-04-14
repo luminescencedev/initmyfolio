@@ -54,7 +54,12 @@ const settingsSchema = z.object({
     .array(
       z.object({
         label: z.string().max(50),
-        url: z.string().url(),
+        url: z
+          .string()
+          .url()
+          .refine((u) => /^https?:\/\//i.test(u), {
+            message: "Only http/https URLs are allowed",
+          }),
         icon: z.string().optional(),
       }),
     )
