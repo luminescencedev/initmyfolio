@@ -22,7 +22,7 @@ authRouter.get("/github", (c) => {
   });
 
   return c.redirect(
-    `https://github.com/login/oauth/authorize?${params.toString()}`
+    `https://github.com/login/oauth/authorize?${params.toString()}`,
   );
 });
 
@@ -51,7 +51,7 @@ authRouter.get("/github/callback", async (c) => {
           code,
           redirect_uri: GITHUB_CALLBACK_URL,
         }),
-      }
+      },
     );
 
     const tokenData = (await tokenRes.json()) as {
@@ -65,17 +65,23 @@ authRouter.get("/github/callback", async (c) => {
 
     const accessToken = tokenData.access_token;
 
-    // Get GitHub user profile
+    // Get GitHub user profile (1 fast API call, ~200ms)
     const githubUser = await fetchGitHubUser(accessToken);
 
-    // Sync GitHub data
-    const githubData = await aggregateGitHubData(githubUser.login, accessToken);
-
-    // Serialize to plain JSON (satisfies Prisma's InputJsonValue)
+    // Seed githubData with the profile we already have so new users see
+    // something immediately. Repos/languages arrive via background sync.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const githubDataJson = JSON.parse(JSON.stringify(githubData)) as any;
+    const profileSeed = JSON.parse(
+      JSON.stringify({
+        profile: githubUser,
+        repos: [],
+        languages: {},
+        totalStars: 0,
+        totalForks: 0,
+      }),
+    ) as any;
 
-    // Upsert user in database
+    // Upsert user in database — no repo/language fetch yet
     const user = await prisma.user.upsert({
       where: { githubId: githubUser.id },
       create: {
@@ -87,10 +93,12 @@ authRouter.get("/github/callback", async (c) => {
         location: githubUser.location,
         website: githubUser.blog,
         email: githubUser.email,
-        githubData: githubDataJson,
-        lastSyncedAt: new Date(),
+        githubData: profileSeed,
+        // lastSyncedAt intentionally null — background sync below will set it
       },
       update: {
+        // Update profile fields but preserve existing githubData so returning
+        // users keep their repo/language data while background sync runs.
         username: githubUser.login,
         displayName: githubUser.name ?? githubUser.login,
         bio: githubUser.bio,
@@ -98,16 +106,27 @@ authRouter.get("/github/callback", async (c) => {
         location: githubUser.location,
         website: githubUser.blog,
         email: githubUser.email,
-        githubData: githubDataJson,
-        lastSyncedAt: new Date(),
       },
     });
 
-    // Create JWT token
+    // Create JWT token and redirect IMMEDIATELY — total time now ~400ms
     const token = await signToken({ userId: user.id, username: user.username });
+    const redirect = c.redirect(`${WEB_URL}/dashboard?token=${token}`);
 
-    // Redirect to dashboard with token
-    return c.redirect(`${WEB_URL}/dashboard?token=${token}`);
+    // Fire-and-forget full repo + language aggregation in the background.
+    // On failure the cron will retry within 8 hours.
+    aggregateGitHubData(githubUser.login, accessToken)
+      .then(async (githubData) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const json = JSON.parse(JSON.stringify(githubData)) as any;
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { githubData: json, lastSyncedAt: new Date() },
+        });
+      })
+      .catch((err) => console.error("[Auth] Background sync failed:", err));
+
+    return redirect;
   } catch (err) {
     console.error("[Auth] GitHub callback error:", err);
     return c.redirect(`${WEB_URL}/login?error=server_error`);

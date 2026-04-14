@@ -113,7 +113,16 @@ export async function updateSettings(
       },
       body: JSON.stringify(settings),
     });
-    return res.ok;
+    if (!res.ok) return false;
+    // Revalidate the portfolio page cache so changes are visible immediately
+    await fetch(`/api/revalidate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }).catch(() => {});
+    return true;
   } catch {
     return false;
   }

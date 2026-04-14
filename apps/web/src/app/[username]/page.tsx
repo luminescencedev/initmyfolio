@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { cache } from "react";
 import {
   GithubLogo,
   MapPin,
@@ -15,6 +16,10 @@ import { getPortfolioUser } from "@/lib/api";
 import { formatNumber, getLanguageColor } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+// Memoize within a single request so generateMetadata and PortfolioPage
+// share one fetch instead of making two identical API calls.
+const getUser = cache(getPortfolioUser);
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -47,7 +52,7 @@ const AVAILABILITY_CONFIG = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
-  const user = await getPortfolioUser(username);
+  const user = await getUser(username);
   if (!user) return { title: "PORTFOLIO NOT FOUND // INITMYFOLIO" };
   const title = `${(user.displayName ?? user.username).toUpperCase()} // INITMYFOLIO`;
   const description =
@@ -77,7 +82,7 @@ export const revalidate = 3600;
 
 export default async function PortfolioPage({ params }: Props) {
   const { username } = await params;
-  const user = await getPortfolioUser(username);
+  const user = await getUser(username);
   if (!user) notFound();
 
   const settings = user.settings ?? {};
@@ -670,7 +675,9 @@ export default async function PortfolioPage({ params }: Props) {
       {accent && (
         <style>{`:root,:root.dark{--primary:${accent.primary};--accent:${accent.primary};--ring:${accent.ring}}`}</style>
       )}
-      <div className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "glass" ? " theme-glass" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}>
+      <div
+        className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "glass" ? " theme-glass" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
+      >
         {/* ── NAV ─────────────────────────────────── */}
         <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">

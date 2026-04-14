@@ -65,7 +65,9 @@ const settingsSchema = z.object({
     .enum(["red", "cyan", "emerald", "amber", "rose", "sky"])
     .optional(),
   fontStyle: z.enum(["mono", "display", "mixed"]).optional(),
-  layoutVariant: z.enum(["brutalist", "terminal", "minimal"]).optional(),
+  layoutVariant: z
+    .enum(["brutalist", "glass", "clean", "editorial"])
+    .optional(),
   heroStyle: z.enum(["name-full", "name-initials", "name-split"]).optional(),
   showAvatar: z.boolean().optional(),
   // Contenu
