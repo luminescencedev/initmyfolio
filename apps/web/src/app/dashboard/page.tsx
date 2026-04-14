@@ -22,9 +22,22 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
-import type { PortfolioUser } from "@/lib/api";
-import { getCurrentUser, triggerSync } from "@/lib/api";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setToken,
+  fetchUserRequested,
+  syncRequested,
+  clearUser,
+} from "@/store/slices/user.slice";
+import {
+  selectUser,
+  selectIsLoaded,
+  selectIsSyncing,
+  selectSyncMessage,
+  selectCanSync,
+} from "@/store/selectors/user.selector";
+import { purgePersistedStore } from "@/store/store";
 
 const APP_URL = process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000";
 
@@ -121,20 +134,22 @@ function PortfolioPreview({ url }: { url: string }) {
 
 /* --- Main dashboard content --- */
 function DashboardContent() {
-  const [user, setUser] = useState<PortfolioUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "warn";
-  } | null>(null);
-  const [syncAvailableAt, setSyncAvailableAt] = useState<Date | null>(null);
+  // Local UI state only
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Redux
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
+  const isLoaded = useAppSelector(selectIsLoaded);
+  const isSyncing = useAppSelector(selectIsSyncing);
+  const syncMessage = useAppSelector(selectSyncMessage);
+  const canSync = useAppSelector(selectCanSync);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Bootstrap: resolve token, kick off initial fetch if data not yet in store
   useEffect(() => {
     const urlToken = searchParams.get("token");
     const storedToken = localStorage.getItem("auth_token");
@@ -147,48 +162,27 @@ function DashboardContent() {
       localStorage.setItem("auth_token", urlToken);
       router.replace("/dashboard");
     }
-    setToken(activeToken);
-    getCurrentUser(activeToken).then((u) => {
-      setLoading(false);
-      if (!u) {
-        localStorage.removeItem("auth_token");
-        router.push("/login");
-        return;
-      }
-      setUser(u);
-    });
-  }, [router, searchParams]);
-
-  const syncCooldownMs = 5 * 60 * 1000;
-  const canSync =
-    !isSyncing &&
-    !syncAvailableAt &&
-    (!user?.lastSyncedAt ||
-      Date.now() - new Date(user.lastSyncedAt).getTime() > syncCooldownMs);
-
-  const handleSync = async () => {
-    if (!token || !user || !canSync) return;
-    setIsSyncing(true);
-    setSyncMessage(null);
-    const result = await triggerSync(token, user.username);
-    setIsSyncing(false);
-    if (result.ok) {
-      setSyncMessage({
-        text: "Sync complete - data updated.",
-        type: "success",
-      });
-      const updated = await getCurrentUser(token);
-      if (updated) setUser(updated);
-    } else if (result.rateLimited && result.availableAt) {
-      setSyncAvailableAt(result.availableAt);
-      const mins = Math.ceil((result.retryAfter ?? 300) / 60);
-      setSyncMessage({
-        text: `Rate limited - retry in ${mins}m.`,
-        type: "warn",
-      });
-    } else {
-      setSyncMessage({ text: "Sync failed. Please retry.", type: "error" });
+    dispatch(setToken(activeToken));
+    if (!isLoaded) {
+      dispatch(fetchUserRequested(activeToken));
     }
+    // Run once on mount — isLoaded intentionally excluded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Redirect to login if fetch resolved without a user
+  useEffect(() => {
+    if (isLoaded && !user) {
+      localStorage.removeItem("auth_token");
+      dispatch(clearUser());
+      purgePersistedStore();
+      router.push("/login");
+    }
+  }, [isLoaded, user, router, dispatch]);
+
+  const handleSync = () => {
+    if (!canSync) return;
+    dispatch(syncRequested());
   };
 
   const handleCopy = () => {
@@ -198,6 +192,13 @@ function DashboardContent() {
     });
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem("auth_token");
+    dispatch(clearUser());
+    purgePersistedStore();
+    router.push("/");
+  };
+
   const portfolioUrl = user
     ? APP_URL.includes("localhost")
       ? `${APP_URL}/${user.username}`
@@ -205,7 +206,7 @@ function DashboardContent() {
     : "#";
 
   /* Skeleton */
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="min-h-dvh bg-background flex">
         <aside className="hidden lg:flex w-64 xl:w-72 shrink-0 border-r border-border/60 h-screen sticky top-0 flex-col gap-4 p-5">
@@ -361,10 +362,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between px-1">
             <ThemeToggle />
             <button
-              onClick={() => {
-                localStorage.removeItem("auth_token");
-                router.push("/");
-              }}
+              onClick={handleSignOut}
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <SignOut weight="regular" className="w-3.5 h-3.5" />
@@ -533,10 +531,7 @@ function DashboardContent() {
                 <div className="p-4 border-t border-border/60 shrink-0">
                   <button
                     type="button"
-                    onClick={() => {
-                      localStorage.removeItem("auth_token");
-                      router.push("/");
-                    }}
+                    onClick={handleSignOut}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/8 transition-colors"
                   >
                     <SignOut weight="regular" className="w-4 h-4 shrink-0" />

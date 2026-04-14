@@ -12,6 +12,7 @@
   "dependencies": {
     "@initmyfolio/ui": "*",
     "@phosphor-icons/react": "^2.1.10",
+    "@reduxjs/toolkit": "^2.11.2",
     "clsx": "^2.1.1",
     "geist": "^1.7.0",
     "lucide-react": "^0.456.0",
@@ -20,6 +21,9 @@
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "redux-persist": "^6.0.0",
+    "redux-saga": "^1.4.2",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
