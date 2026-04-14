@@ -200,11 +200,20 @@ export default async function PortfolioPage({ params }: Props) {
   ];
 
   /* ── JSON-LD ───────────────────────────────────── */
+  const appDomain = process.env["NEXT_PUBLIC_APP_DOMAIN"] ?? "";
+  const appUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "";
+  const usesCustomDomain =
+    !!appDomain &&
+    !appDomain.includes("localhost") &&
+    !appDomain.includes("vercel.app");
+  const canonicalUrl = usesCustomDomain
+    ? `https://${user.username}.${appDomain}`
+    : `${appUrl}/${user.username}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: user.displayName ?? user.username,
-    url: `https://${user.username}.initmyfolio.com`,
+    url: canonicalUrl,
     image: user.avatarUrl,
     description: user.bio,
     sameAs: [`https://github.com/${user.username}`],

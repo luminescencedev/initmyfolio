@@ -250,10 +250,18 @@ function DashboardContent() {
     router.push("/");
   };
 
+  // Use subdomain format only when a proper custom domain is configured
+  // (not localhost, not Vercel's default *.vercel.app).
+  // Without a custom domain, portfolios are at APP_URL/username (path-based).
+  const APP_DOMAIN = process.env["NEXT_PUBLIC_APP_DOMAIN"] ?? "";
+  const usesCustomDomain =
+    !!APP_DOMAIN &&
+    !APP_DOMAIN.includes("localhost") &&
+    !APP_DOMAIN.includes("vercel.app");
   const portfolioUrl = user
-    ? APP_URL.includes("localhost")
-      ? `${APP_URL}/${user.username}`
-      : `https://${user.username}.initmyfolio.com`
+    ? usesCustomDomain
+      ? `https://${user.username}.${APP_DOMAIN}`
+      : `${APP_URL}/${user.username}`
     : "#";
 
   /* Skeleton */
