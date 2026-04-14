@@ -6,6 +6,7 @@ import {
   toStoredProfile,
 } from "../lib/github.js";
 import { signToken } from "../lib/jwt.js";
+import { encryptToken } from "../lib/crypto.js";
 
 export const authRouter = new Hono();
 
@@ -166,6 +167,7 @@ authRouter.get("/github/callback", async (c) => {
         website: githubUser.blog,
         email: githubUser.email,
         githubData: profileSeed,
+        githubTokenEncrypted: encryptToken(accessToken),
         // lastSyncedAt intentionally null — background sync below will set it
       },
       update: {
@@ -176,6 +178,7 @@ authRouter.get("/github/callback", async (c) => {
         location: githubUser.location,
         website: githubUser.blog,
         email: githubUser.email,
+        githubTokenEncrypted: encryptToken(accessToken),
       },
     });
 

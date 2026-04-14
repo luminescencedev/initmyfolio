@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { createHash, timingSafeEqual } from "crypto";
 import { prisma } from "@initmyfolio/db";
 import { aggregateGitHubData } from "../lib/github.js";
+import { decryptToken } from "../lib/crypto.js";
 
 export const syncRouter = new Hono();
 
@@ -36,7 +37,10 @@ syncRouter.post("/:username", async (c) => {
     }
   }
 
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true, lastSyncedAt: true, githubTokenEncrypted: true },
+  });
   if (!user) {
     return c.json({ error: "User not found" }, 404);
   }
@@ -60,7 +64,15 @@ syncRouter.post("/:username", async (c) => {
   }
 
   try {
-    const { stored, userUpdate } = await aggregateGitHubData(username);
+    // Prefer the user's own OAuth token (5000 req/h per user).
+    // Fall back to the server PAT if the token is missing or decryption fails.
+    const userToken = user.githubTokenEncrypted
+      ? decryptToken(user.githubTokenEncrypted)
+      : null;
+    const { stored, userUpdate } = await aggregateGitHubData(
+      username,
+      userToken ?? undefined,
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const githubDataJson = JSON.parse(JSON.stringify(stored)) as any;
 

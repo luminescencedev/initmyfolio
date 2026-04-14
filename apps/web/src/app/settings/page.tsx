@@ -422,7 +422,7 @@ function SettingsContent() {
   /* ── Skeleton ── */
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-background">
+      <div className="min-h-dvh bg-background">
         <header className="h-16 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-20" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid lg:grid-cols-[220px_1fr] gap-8">
@@ -446,7 +446,7 @@ function SettingsContent() {
   if (!user) return null;
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="min-h-dvh bg-background">
       {/* ── HEADER ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -992,7 +992,7 @@ function CustomLinksEditor({
             onChange={(e) => setNewUrl(e.target.value)}
             placeholder="https://…"
             onKeyDown={(e) => e.key === "Enter" && addLink()}
-            className="flex-[2] px-4 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
+            className="flex-2 px-4 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-shadow"
           />
           <button
             type="button"

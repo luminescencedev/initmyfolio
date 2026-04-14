@@ -237,7 +237,7 @@ export default async function PortfolioPage({ params }: Props) {
         .join("");
       return (
         <span
-          className={`${heroFontClass} uppercase tracking-tighter text-foreground leading-[0.85] pb-6 block break-words`}
+          className={`${heroFontClass} uppercase tracking-tighter text-foreground leading-[0.85] pb-6 block wrap-break-word`}
           style={{ fontSize: "clamp(4rem, 20vw, 20rem)" }}
         >
           {initials}
@@ -268,7 +268,7 @@ export default async function PortfolioPage({ params }: Props) {
     // name-full (default)
     return (
       <h1
-        className={`${heroFontClass} uppercase tracking-tighter text-foreground leading-[0.85] pb-6 break-words`}
+        className={`${heroFontClass} uppercase tracking-tighter text-foreground leading-[0.85] pb-6 wrap-break-word`}
         style={{ fontSize: "clamp(2.25rem, 11vw, 11rem)" }}
       >
         {displayName}

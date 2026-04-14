@@ -95,13 +95,14 @@ export default function PrivacyPage() {
               </li>
             </ul>
             <p className="mt-4">
-              Your GitHub access token is used only during the OAuth callback to
-              seed your profile. It is{" "}
+              Your GitHub access token is used to fetch your data during the
+              OAuth callback and for subsequent syncs. It is stored{" "}
               <strong className="text-foreground font-medium">
-                not stored
+                encrypted at rest
               </strong>{" "}
-              in our database. Subsequent syncs use the GitHub public API with a
-              server-side token that has no access to your account.
+              in our database using AES-256-GCM with a key derived from the
+              application secret. The plaintext token is never logged or exposed
+              outside of the sync process.
             </p>
           </section>
 

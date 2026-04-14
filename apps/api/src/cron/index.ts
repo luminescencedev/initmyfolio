@@ -1,5 +1,6 @@
 import { prisma } from "@initmyfolio/db";
 import { aggregateGitHubData } from "../lib/github.js";
+import { decryptToken } from "../lib/crypto.js";
 
 const SYNC_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
 const BATCH_SIZE = 10;
@@ -7,7 +8,17 @@ const BATCH_DELAY_MS = 5000; // 5s between batches to avoid rate limits
 
 async function syncUser(username: string): Promise<void> {
   try {
-    const { stored, userUpdate } = await aggregateGitHubData(username);
+    const record = await prisma.user.findUnique({
+      where: { username },
+      select: { githubTokenEncrypted: true },
+    });
+    const userToken = record?.githubTokenEncrypted
+      ? decryptToken(record.githubTokenEncrypted)
+      : null;
+    const { stored, userUpdate } = await aggregateGitHubData(
+      username,
+      userToken ?? undefined,
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const githubDataJson = JSON.parse(JSON.stringify(stored)) as any;
 
