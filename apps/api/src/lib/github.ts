@@ -125,8 +125,9 @@ async function githubFetch<T>(path: string, accessToken?: string): Promise<T> {
     "User-Agent": "InitMyFolio/1.0",
   };
 
-  if (accessToken) {
-    headers["Authorization"] = `Bearer ${accessToken}`;
+  const token = accessToken ?? process.env["GITHUB_TOKEN"];
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(`${GITHUB_API}${path}`, { headers });

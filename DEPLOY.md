@@ -28,12 +28,12 @@ Durée estimée : 45 à 60 minutes.
 
 Créez ces quatre comptes avant de commencer (tous gratuits) :
 
-| Service | URL | Usage |
-|---------|-----|-------|
-| GitHub | github.com | Hébergement du code + OAuth |
-| Neon | neon.tech | Base de données PostgreSQL |
-| Render | render.com | Hébergement de l'API Node.js |
-| Vercel | vercel.com | Hébergement du frontend Next.js |
+| Service | URL        | Usage                           |
+| ------- | ---------- | ------------------------------- |
+| GitHub  | github.com | Hébergement du code + OAuth     |
+| Neon    | neon.tech  | Base de données PostgreSQL      |
+| Render  | render.com | Hébergement de l'API Node.js    |
+| Vercel  | vercel.com | Hébergement du frontend Next.js |
 
 > Connectez Render et Vercel avec votre compte GitHub — ça simplifie le déploiement.
 
@@ -59,11 +59,11 @@ cp .env.example .env
 1. Sur GitHub, allez dans **Settings** → **Developer settings** → **OAuth Apps** → **New OAuth App**
 2. Remplissez le formulaire :
 
-| Champ | Valeur |
-|-------|--------|
-| Application name | `initmyfolio` |
-| Homepage URL | `https://votre-app.vercel.app` *(à compléter après l'étape 6)* |
-| Authorization callback URL | `https://initmyfolio-api.onrender.com/auth/github/callback` *(à compléter après l'étape 5)* |
+| Champ                      | Valeur                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| Application name           | `initmyfolio`                                                                               |
+| Homepage URL               | `https://votre-app.vercel.app` _(à compléter après l'étape 6)_                              |
+| Authorization callback URL | `https://initmyfolio-api.onrender.com/auth/github/callback` _(à compléter après l'étape 5)_ |
 
 > Pas de panique si vous ne connaissez pas encore les URLs : créez l'app avec des valeurs provisoires, vous pourrez les mettre à jour après les étapes 5 et 6.
 
@@ -92,11 +92,13 @@ cp .env.example .env
 Dans le dashboard Neon → **Connection Details** :
 
 **URL poolée (DATABASE_URL) :** sélectionnez **Pooled connection**
+
 ```
 postgresql://neondb_owner:xxxx@ep-xxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
 
 **URL directe (DIRECT_URL) :** sélectionnez **Direct connection**
+
 ```
 postgresql://neondb_owner:xxxx@ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ```
@@ -126,15 +128,15 @@ Sortie attendue : `🚀  Your database is now in sync with your Prisma schema.`
 
 ### 5.2 Configurer le service
 
-| Champ | Valeur |
-|-------|--------|
-| **Name** | `initmyfolio-api` |
-| **Region** | Même région que Neon |
-| **Branch** | `main` |
-| **Runtime** | `Node` |
-| **Build Command** | `npm ci && npm run db:generate --workspace=@initmyfolio/db && npm run build --workspace=@initmyfolio/api` |
-| **Start Command** | `node apps/api/dist/index.js` |
-| **Instance Type** | `Free` |
+| Champ             | Valeur                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**          | `initmyfolio-api`                                                                                                                     |
+| **Region**        | Même région que Neon                                                                                                                  |
+| **Branch**        | `main`                                                                                                                                |
+| **Runtime**       | `Node`                                                                                                                                |
+| **Build Command** | `npm ci --include=dev && npx prisma generate --schema=packages/db/prisma/schema.prisma && npm run build --workspace=@initmyfolio/api` |
+| **Start Command** | `node apps/api/dist/index.js`                                                                                                         |
+| **Instance Type** | `Free`                                                                                                                                |
 
 ### 5.3 Générer les secrets
 
@@ -145,24 +147,28 @@ openssl rand -hex 32   # → INTERNAL_SYNC_KEY
 
 ### 5.4 Ajouter les variables d'environnement
 
-| Key | Value |
-|-----|-------|
-| `NODE_ENV` | `production` |
-| `API_PORT` | `3001` |
-| `DATABASE_URL` | *(URL poolée Neon)* |
-| `DIRECT_URL` | *(URL directe Neon)* |
-| `GITHUB_CLIENT_ID` | *(étape 3.2)* |
-| `GITHUB_CLIENT_SECRET` | *(étape 3.2)* |
-| `GITHUB_CALLBACK_URL` | `https://initmyfolio-api.onrender.com/auth/github/callback` |
-| `CORS_ORIGIN` | `https://votre-app.vercel.app` *(à mettre à jour après l'étape 6.4)* |
-| `JWT_SECRET` | *(valeur générée)* |
-| `INTERNAL_SYNC_KEY` | *(valeur générée)* |
+| Key                    | Value                                                                |
+| ---------------------- | -------------------------------------------------------------------- |
+| `NODE_ENV`             | `production`                                                         |
+| `API_PORT`             | `3001`                                                               |
+| `DATABASE_URL`         | _(URL poolée Neon)_                                                  |
+| `DIRECT_URL`           | _(URL directe Neon)_                                                 |
+| `GITHUB_CLIENT_ID`     | _(étape 3.2)_                                                        |
+| `GITHUB_CLIENT_SECRET` | _(étape 3.2)_                                                        |
+| `GITHUB_CALLBACK_URL`  | `https://initmyfolio-api.onrender.com/auth/github/callback`          |
+| `CORS_ORIGIN`          | `https://votre-app.vercel.app` _(à mettre à jour après l'étape 6.4)_ |
+| `JWT_SECRET`           | _(valeur générée)_                                                   |
+| `INTERNAL_SYNC_KEY`    | _(valeur générée)_                                                   |
+| `GITHUB_TOKEN`         | _(PAT GitHub — voir note ci-dessous)_                                |
 
+> **`GITHUB_TOKEN`** — Sans ce token, les syncs GitHub utilisent l'API non-authentifiée (60 req/heure par IP, partagée entre tous les services Render). Avec des utilisateurs qui ont beaucoup de repos, ce quota s'épuise vite → erreur 500 au sync. Pour créer un PAT : GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token** → aucun scope nécessaire (les données de profil public sont accessibles sans scope). Cela monte la limite à 5 000 req/heure.
+>
 > **`CORS_ORIGIN`** doit être l'URL **exacte** de votre frontend Vercel, **sans slash final**. L'API la compare caractère par caractère avec l'en-tête `Origin` du navigateur — une erreur ici = CORS bloqué = l'app ne fonctionne pas.
 
 ### 5.5 Déployer et récupérer l'URL
 
 Cliquez **Create Web Service**. Une fois déployé, notez l'URL :
+
 ```
 https://initmyfolio-api.onrender.com
 ```
@@ -181,12 +187,12 @@ Retournez sur **GitHub OAuth App** et mettez à jour **Authorization callback UR
 
 ### 6.2 Variables d'environnement
 
-| Key | Value |
-|-----|-------|
-| `NEXT_PUBLIC_API_URL` | `https://initmyfolio-api.onrender.com` *(URL Render)* |
-| `NEXT_PUBLIC_APP_URL` | `https://votre-app.vercel.app` *(voir note ci-dessous)* |
-| `NEXT_PUBLIC_APP_DOMAIN` | *(laisser vide — sans domaine custom, URLs en chemin)* |
-| `JWT_SECRET` | *(même valeur que sur Render — **obligatoirement identique**)* |
+| Key                      | Value                                                          |
+| ------------------------ | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`    | `https://initmyfolio-api.onrender.com` _(URL Render)_          |
+| `NEXT_PUBLIC_APP_URL`    | `https://votre-app.vercel.app` _(voir note ci-dessous)_        |
+| `NEXT_PUBLIC_APP_DOMAIN` | _(laisser vide — sans domaine custom, URLs en chemin)_         |
+| `JWT_SECRET`             | _(même valeur que sur Render — **obligatoirement identique**)_ |
 
 > **`NEXT_PUBLIC_APP_DOMAIN` vide** — c'est le signal qui fait que les URLs portfolio utilisent le format chemin (`https://votre-app.vercel.app/username`) au lieu du format sous-domaine. Ne mettez pas `vercel.app` ici.
 >
@@ -224,6 +230,7 @@ curl -I -X OPTIONS https://initmyfolio-api.onrender.com/auth/exchange \
 ```
 
 Réponse attendue :
+
 ```
 HTTP/2 204
 access-control-allow-origin: https://votre-app.vercel.app
@@ -314,6 +321,7 @@ npm run dev
 Le service dort après 15 minutes sans requête (cold start : 30-60 s).
 
 **Workaround :** [UptimeRobot](https://uptimerobot.com) gratuit — pinger `/health` toutes les 5 minutes :
+
 - Monitor type : `HTTP(s)`
 - URL : `https://initmyfolio-api.onrender.com/health`
 - Interval : `5 minutes`
@@ -348,16 +356,17 @@ Quand vous aurez un domaine (ex. `initmyfolio.com`), 4 étapes pour passer en so
 ### 11.2 Associer le domaine dans Vercel
 
 **Settings → Domains** :
+
 1. Ajoutez `initmyfolio.com`
 2. Ajoutez `*.initmyfolio.com` (wildcard pour les portfolios)
 
 ### 11.3 Configurer le DNS (Hostinger)
 
-| Type | Nom | Pointe vers |
-|------|-----|-------------|
-| `A` | `@` | `76.76.21.21` |
+| Type    | Nom   | Pointe vers            |
+| ------- | ----- | ---------------------- |
+| `A`     | `@`   | `76.76.21.21`          |
 | `CNAME` | `www` | `cname.vercel-dns.com` |
-| `CNAME` | `*` | `cname.vercel-dns.com` |
+| `CNAME` | `*`   | `cname.vercel-dns.com` |
 
 Le record `*` est essentiel — c'est lui qui dirige `arthur.initmyfolio.com` vers Vercel.
 
@@ -369,16 +378,17 @@ Déclenchez un redéploiement sur Render et Vercel. Les portfolios passent autom
 
 ## Récapitulatif des variables d'environnement
 
-| Variable | Où la définir | Valeur sans domaine custom |
-|----------|--------------|---------------------------|
-| `GITHUB_CLIENT_ID` | Render | *(OAuth App)* |
-| `GITHUB_CLIENT_SECRET` | Render | *(OAuth App)* |
-| `GITHUB_CALLBACK_URL` | Render | `https://<api>.onrender.com/auth/github/callback` |
-| `JWT_SECRET` | Render **ET** Vercel (identique) | `openssl rand -hex 32` |
-| `DATABASE_URL` | Render | Neon → Pooled connection |
-| `DIRECT_URL` | Render | Neon → Direct connection |
-| `INTERNAL_SYNC_KEY` | Render | `openssl rand -hex 32` |
-| `CORS_ORIGIN` | Render | `https://votre-app.vercel.app` |
-| `NEXT_PUBLIC_API_URL` | Vercel | `https://<api>.onrender.com` |
-| `NEXT_PUBLIC_APP_URL` | Vercel | `https://votre-app.vercel.app` |
-| `NEXT_PUBLIC_APP_DOMAIN` | Vercel | *(laisser vide)* |
+| Variable                 | Où la définir                    | Valeur sans domaine custom                        |
+| ------------------------ | -------------------------------- | ------------------------------------------------- |
+| `GITHUB_CLIENT_ID`       | Render                           | _(OAuth App)_                                     |
+| `GITHUB_CLIENT_SECRET`   | Render                           | _(OAuth App)_                                     |
+| `GITHUB_CALLBACK_URL`    | Render                           | `https://<api>.onrender.com/auth/github/callback` |
+| `JWT_SECRET`             | Render **ET** Vercel (identique) | `openssl rand -hex 32`                            |
+| `DATABASE_URL`           | Render                           | Neon → Pooled connection                          |
+| `DIRECT_URL`             | Render                           | Neon → Direct connection                          |
+| `INTERNAL_SYNC_KEY`      | Render                           | `openssl rand -hex 32`                            |
+| `GITHUB_TOKEN`           | Render                           | PAT GitHub (aucun scope requis)                   |
+| `CORS_ORIGIN`            | Render                           | `https://votre-app.vercel.app`                    |
+| `NEXT_PUBLIC_API_URL`    | Vercel                           | `https://<api>.onrender.com`                      |
+| `NEXT_PUBLIC_APP_URL`    | Vercel                           | `https://votre-app.vercel.app`                    |
+| `NEXT_PUBLIC_APP_DOMAIN` | Vercel                           | _(laisser vide)_                                  |
