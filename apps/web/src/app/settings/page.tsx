@@ -284,7 +284,8 @@ function SettingsContent() {
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
-  const [activeSection, setActiveSection] = useState("appearance");
+  const [activeSection, setActiveSection] =
+    useState<(typeof NAV_SECTIONS)[number]["id"]>("appearance");
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialSettings = useRef<UserSettings>({});
@@ -359,19 +360,36 @@ function SettingsContent() {
   };
 
   useEffect(() => {
-    const sections = NAV_SECTIONS.map((s) =>
-      document.getElementById(s.id),
-    ).filter(Boolean);
-    const obs = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActiveSection(e.target.id);
-        }
-      },
-      { threshold: 0.2, rootMargin: "-64px 0px -60% 0px" },
-    );
-    sections.forEach((el) => el && obs.observe(el));
-    return () => obs.disconnect();
+    if (loading) return;
+    // Trigger line = 50% of viewport height.
+    // A section becomes active as soon as its header crosses that line going up.
+    // Edge cases: force first section at very top, last section at very bottom.
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
+      const docH = document.documentElement.scrollHeight;
+
+      if (scrollY < 10) {
+        setActiveSection(NAV_SECTIONS[0].id);
+        return;
+      }
+      if (scrollY + vh >= docH - 4) {
+        setActiveSection(NAV_SECTIONS[NAV_SECTIONS.length - 1].id);
+        return;
+      }
+
+      // getBoundingClientRect gives viewport-relative position — compare to 50% vh
+      const trigger = vh * 0.5;
+      let active: (typeof NAV_SECTIONS)[number]["id"] = NAV_SECTIONS[0].id;
+      for (const { id } of NAV_SECTIONS) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= trigger) active = id;
+      }
+      setActiveSection(active);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [loading]);
 
   /* ── Skeleton ── */
@@ -501,16 +519,26 @@ function SettingsContent() {
               <ul className="space-y-0.5">
                 {NAV_SECTIONS.map((sec) => (
                   <li key={sec.id}>
-                    <a
-                      href={`#${sec.id}`}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById(sec.id);
+                        if (!el) return;
+                        // Scroll so the section header lands exactly at the 50% trigger line
+                        const top =
+                          el.getBoundingClientRect().top +
+                          window.scrollY -
+                          window.innerHeight * 0.5;
+                        window.scrollTo({ top, behavior: "smooth" });
+                      }}
+                      className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                         activeSection === sec.id
                           ? "bg-foreground text-background font-medium"
                           : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
                       {sec.label}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>

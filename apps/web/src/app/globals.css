@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* ── Anchor scroll offset — accounts for sticky 64px header */
+html {
+  scroll-padding-top: 80px;
+}
+
 /* ── Scan the shared UI package (monorepo) */
 @source "../../packages/ui/src";
 
