@@ -1,4 +1,5 @@
 import { createSlice, createAction, PayloadAction } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 import type { PortfolioUser } from "@/lib/api";
 
 export const SYNC_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
@@ -52,6 +53,13 @@ const userSlice = createSlice({
     clearUser() {
       return initialState;
     },
+  },
+  extraReducers: (builder) => {
+    // On rehydration from sessionStorage, wipe transient UI state
+    builder.addCase(REHYDRATE, (state) => {
+      state.syncMessage = null;
+      state.isSyncing = false;
+    });
   },
 });
 

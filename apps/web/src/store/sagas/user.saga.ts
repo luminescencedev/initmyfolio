@@ -1,4 +1,4 @@
-import { call, put, select } from "redux-saga/effects";
+import { call, put, select, delay } from "redux-saga/effects";
 import type { SagaIterator } from "redux-saga";
 import { getCurrentUser, triggerSync } from "@/lib/api";
 import type { PortfolioUser } from "@/lib/api";
@@ -46,6 +46,8 @@ function* syncWorker(): SagaIterator {
     );
     yield put(setLastSyncedAt(Date.now()));
     yield call(fetchUserWorker, token);
+    yield delay(4000);
+    yield put(setSyncMessage(null));
   } else if (result.rateLimited && result.availableAt) {
     const until = result.availableAt.getTime();
     yield put(setSyncRateLimitedUntil(until));
@@ -56,10 +58,14 @@ function* syncWorker(): SagaIterator {
         type: "warn",
       }),
     );
+    yield delay(8000);
+    yield put(setSyncMessage(null));
   } else {
     yield put(
       setSyncMessage({ text: "Sync failed. Please retry.", type: "error" }),
     );
+    yield delay(8000);
+    yield put(setSyncMessage(null));
   }
 }
 
