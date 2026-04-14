@@ -18,18 +18,29 @@ if (process.env["NODE_ENV"] === "production" && !process.env["CORS_ORIGIN"]) {
 // Global middleware
 app.use("*", logger());
 app.use("*", secureHeaders());
+
+const configuredOrigin = process.env["CORS_ORIGIN"] ?? "http://localhost:3000";
+const allowedOrigins = new Set<string>([configuredOrigin]);
+if (process.env["NODE_ENV"] !== "production") {
+  // Always accept localhost origins in dev regardless of CORS_ORIGIN value
+  allowedOrigins.add("http://localhost:3000");
+  allowedOrigins.add("http://127.0.0.1:3000");
+}
+
 app.use(
   "*",
   cors({
-    origin: process.env["CORS_ORIGIN"] ?? "http://localhost:3000",
+    origin: (origin) => (allowedOrigins.has(origin) ? origin : null),
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
 // Health check
-app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
+app.get("/health", (c) =>
+  c.json({ status: "ok", timestamp: new Date().toISOString() }),
+);
 
 // Routes
 app.route("/auth", authRouter);

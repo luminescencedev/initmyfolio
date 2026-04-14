@@ -13,7 +13,10 @@ const csp = [
   "default-src 'self'",
   // 'unsafe-inline' is required for the theme-detection inline script
   // and for Tailwind/CSS-in-JS. Remove once nonces are implemented.
-  "script-src 'self' 'unsafe-inline'",
+  // 'unsafe-eval' is required by React dev mode for stack trace reconstruction.
+  process.env["NODE_ENV"] === "production"
+    ? "script-src 'self' 'unsafe-inline'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   // GitHub avatars + our own assets
   "img-src 'self' https://avatars.githubusercontent.com https://github.com data: blob:",

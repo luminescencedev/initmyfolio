@@ -155,6 +155,9 @@ function DashboardContent() {
   // Local UI state only
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Guard against React Strict Mode double-invoking the code exchange.
+  // Refs persist across the synthetic unmount/remount so the second run is a no-op.
+  const exchangeInitiated = useRef(false);
 
   // Redux
   const dispatch = useAppDispatch();
@@ -180,6 +183,8 @@ function DashboardContent() {
       let activeToken = storedToken;
 
       if (urlCode) {
+        if (exchangeInitiated.current) return;
+        exchangeInitiated.current = true;
         try {
           const res = await fetch(`${API_URL}/auth/exchange`, {
             method: "POST",
