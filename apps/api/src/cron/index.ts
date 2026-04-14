@@ -7,19 +7,19 @@ const BATCH_DELAY_MS = 5000; // 5s between batches to avoid rate limits
 
 async function syncUser(username: string): Promise<void> {
   try {
-    const githubData = await aggregateGitHubData(username);
+    const { stored, userUpdate } = await aggregateGitHubData(username);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const githubDataJson = JSON.parse(JSON.stringify(githubData)) as any;
+    const githubDataJson = JSON.parse(JSON.stringify(stored)) as any;
 
     await prisma.user.update({
       where: { username },
       data: {
         githubData: githubDataJson,
-        displayName: githubData.profile.name ?? username,
-        bio: githubData.profile.bio,
-        avatarUrl: githubData.profile.avatar_url,
-        location: githubData.profile.location,
-        website: githubData.profile.blog,
+        displayName: userUpdate.displayName ?? username,
+        bio: userUpdate.bio,
+        avatarUrl: userUpdate.avatarUrl,
+        location: userUpdate.location,
+        website: userUpdate.website,
         lastSyncedAt: new Date(),
       },
     });
@@ -36,10 +36,7 @@ async function runSyncJob(): Promise<void> {
 
   const users = await prisma.user.findMany({
     where: {
-      OR: [
-        { lastSyncedAt: null },
-        { lastSyncedAt: { lt: eightHoursAgo } },
-      ],
+      OR: [{ lastSyncedAt: null }, { lastSyncedAt: { lt: eightHoursAgo } }],
     },
     select: { username: true },
     orderBy: { lastSyncedAt: "asc" },
