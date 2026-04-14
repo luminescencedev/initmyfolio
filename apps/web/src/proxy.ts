@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const APP_DOMAIN = process.env["NEXT_PUBLIC_APP_DOMAIN"] ?? "localhost:3000";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const url = request.nextUrl.clone();
 

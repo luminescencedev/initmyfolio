@@ -103,6 +103,9 @@ export default async function PortfolioPage({ params }: Props) {
   const techStack = settings.techStack ?? [];
   const featuredRepoName = settings.featuredRepo ?? null;
 
+  /* ── Glass flag ──────────────────────────────────── */
+  const isGlass = settings.layoutVariant === "glass";
+
   /* ── Repo sorting ─────────────────────────────── */
   const sortedRepos = (() => {
     if (repoSortBy === "pinned-first") {
@@ -671,129 +674,479 @@ export default async function PortfolioPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* Dynamic accent color override */}
       {accent && (
         <style>{`:root,:root.dark{--primary:${accent.primary};--accent:${accent.primary};--ring:${accent.ring}}`}</style>
       )}
-      <div
-        className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "glass" ? " theme-glass" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
-      >
-        {/* ── NAV ─────────────────────────────────── */}
-        <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+
+      {isGlass ? (
+        /* ══════════════════════════════════════════
+           GLASS BENTO LAYOUT
+           ══════════════════════════════════════════ */
+        <div className="theme-glass min-h-[100dvh]">
+          {/* ── NAV */}
+          <nav className="pf-glass-nav sticky top-0 z-50">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
               <Link
                 href="/"
-                className="flex items-center gap-2 label hover:text-foreground transition-colors"
+                className="flex items-center gap-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                INITMYFOLIO
+                <ArrowLeft weight="bold" className="w-4 h-4" />
+                initmyfolio
               </Link>
-              <span className="label hidden sm:block">///</span>
-              <span className="label hidden sm:block text-foreground">
-                {user.username}
-              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://github.com/${user.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pf-chip"
+                >
+                  <GithubLogo weight="fill" className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">GitHub</span>
+                </a>
+                <ThemeToggle />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={`https://github.com/${user.username}`}
-                target="_blank"
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-border text-[11px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground transition-colors active:scale-[0.98]"
-              >
-                <GithubLogo weight="regular" className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">GITHUB</span>
-              </a>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
+          </nav>
 
-        {/* ── HERO ────────────────────────────────── */}
-        <header className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-0">
-            <div className="overflow-hidden">{heroNameContent}</div>
-
-            {/* Meta strip */}
-            <div className="border-t border-border py-4 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:items-center">
-              {/* Avatar + bio row */}
-              <div className="flex items-start gap-3 sm:contents">
+          {/* ── BENTO GRID */}
+          <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+            <div className="pf-bento-grid">
+              {/* HERO — full width */}
+              <div className="pf-glass-card pf-bento-wide p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
                 {showAvatar && user.avatarUrl && (
                   <Image
                     src={user.avatarUrl}
-                    alt={displayName}
-                    width={32}
-                    height={32}
-                    className="rounded-full border border-border shrink-0"
+                    alt={user.displayName ?? user.username}
+                    width={88}
+                    height={88}
+                    className="rounded-2xl ring-2 ring-white/50 dark:ring-white/10 shrink-0"
                   />
                 )}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-1.5">
+                    {user.displayName ?? user.username}
+                  </h1>
                   {user.bio && (
-                    <p className="text-xs text-muted-foreground">{user.bio}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 max-w-[55ch]">
+                      {user.bio}
+                    </p>
                   )}
-                  {/* Availability badge */}
-                  {availability && AVAILABILITY_CONFIG[availability] && (
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-mono uppercase tracking-widest w-fit ${AVAILABILITY_CONFIG[availability].color}`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                      {AVAILABILITY_CONFIG[availability].label}
-                    </span>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {availability && AVAILABILITY_CONFIG[availability] && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${AVAILABILITY_CONFIG[availability].color}`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        {AVAILABILITY_CONFIG[availability].label.toLowerCase()}
+                      </span>
+                    )}
+                    {user.location && (
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin weight="fill" className="w-3.5 h-3.5" />
+                        {user.location}
+                      </span>
+                    )}
+                    {user.website && (
+                      <a
+                        href={user.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Globe weight="fill" className="w-3.5 h-3.5" />
+                        {user.website.replace(/^https?:\/\//, "")}
+                      </a>
+                    )}
+                    {settings.showEmail && user.email && (
+                      <a
+                        href={`mailto:${user.email}`}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <EnvelopeSimple weight="fill" className="w-3.5 h-3.5" />
+                        {user.email}
+                      </a>
+                    )}
+                  </div>
                 </div>
+                <a
+                  href={`https://github.com/${user.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pf-chip shrink-0 self-start sm:self-center"
+                >
+                  <GithubLogo weight="fill" className="w-4 h-4" />
+                  View profile
+                </a>
               </div>
-              {/* Links row */}
-              <div className="flex items-center gap-4 flex-wrap sm:ml-auto">
-                {user.location && (
-                  <span className="flex items-center gap-1.5 label">
-                    <MapPin weight="regular" className="w-3.5 h-3.5" />
-                    {user.location}
+
+              {/* STATS — 4 tiles × 3 cols = full row at lg */}
+              {!hideSections.includes("stats") &&
+                (
+                  [
+                    {
+                      val: formatNumber(
+                        user.githubData?.profile?.public_repos ?? 0,
+                      ),
+                      label: "Repos",
+                    },
+                    {
+                      val: formatNumber(user.githubData?.totalStars ?? 0),
+                      label: "Stars",
+                    },
+                    {
+                      val: formatNumber(user.githubData?.totalForks ?? 0),
+                      label: "Forks",
+                    },
+                    {
+                      val: formatNumber(
+                        user.githubData?.profile?.followers ?? 0,
+                      ),
+                      label: "Followers",
+                    },
+                  ] as const
+                ).map(({ val, label }) => (
+                  <div
+                    key={label}
+                    className="pf-glass-card pf-bento-3 p-5 flex flex-col justify-between gap-2"
+                  >
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {label}
+                    </span>
+                    <span className="text-3xl font-bold font-mono text-foreground tracking-tight tabular-nums">
+                      {val}
+                    </span>
+                  </div>
+                ))}
+
+              {/* REPOS — 7 cols */}
+              {!hideSections.includes("repos") &&
+                (allRepos.length > 0 || featuredRepo) && (
+                  <div className="pf-glass-card pf-bento-7 overflow-hidden">
+                    <div className="px-5 pt-5 pb-3 border-b border-border/40 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-foreground">
+                        Repositories
+                      </span>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {allRepos.length} total
+                      </span>
+                    </div>
+                    <div className="divide-y divide-border/40">
+                      {featuredRepo && (
+                        <a
+                          href={featuredRepo.html_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-5 py-3.5 hover:bg-white/30 dark:hover:bg-white/5 transition-colors group"
+                        >
+                          <span className="text-[10px] font-semibold text-primary border border-primary/30 bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
+                            featured
+                          </span>
+                          {featuredRepo.language && (
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{
+                                backgroundColor: getLanguageColor(
+                                  featuredRepo.language,
+                                ),
+                              }}
+                            />
+                          )}
+                          <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate flex-1">
+                            {featuredRepo.name}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                            <Star
+                              weight="fill"
+                              className="w-3 h-3 text-amber-400"
+                            />
+                            {formatNumber(featuredRepo.stargazers_count)}
+                          </span>
+                        </a>
+                      )}
+                      {displayRepos.map((repo) => (
+                        <a
+                          key={repo.id}
+                          href={repo.html_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-5 py-3 hover:bg-white/30 dark:hover:bg-white/5 transition-colors group"
+                        >
+                          {repo.language && (
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{
+                                backgroundColor: getLanguageColor(
+                                  repo.language,
+                                ),
+                              }}
+                            />
+                          )}
+                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate flex-1">
+                            {repo.name}
+                          </span>
+                          {repo.description && (
+                            <span className="text-xs text-muted-foreground truncate hidden lg:block max-w-[180px]">
+                              {repo.description}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                            <Star
+                              weight="fill"
+                              className="w-3 h-3 text-amber-400"
+                            />
+                            {formatNumber(repo.stargazers_count)}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* LANGUAGES — 5 cols */}
+              {!hideSections.includes("languages") &&
+                topLanguages.length > 0 && (
+                  <div className="pf-glass-card pf-bento-5 p-6">
+                    <span className="text-sm font-semibold text-foreground block mb-4">
+                      Languages
+                    </span>
+                    <div className="flex w-full h-2.5 rounded-full overflow-hidden mb-5">
+                      {topLanguages.map(({ lang, pct }) => (
+                        <div
+                          key={lang}
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: getLanguageColor(lang),
+                          }}
+                          title={`${lang}: ${pct}%`}
+                        />
+                      ))}
+                    </div>
+                    <div className="space-y-3">
+                      {topLanguages.slice(0, 6).map(({ lang, pct }) => (
+                        <div key={lang} className="flex items-center gap-2.5">
+                          <span
+                            className="w-2.5 h-2.5 rounded-sm shrink-0"
+                            style={{ backgroundColor: getLanguageColor(lang) }}
+                          />
+                          <span className="text-sm text-foreground flex-1 truncate">
+                            {lang}
+                          </span>
+                          <span className="text-sm font-mono font-semibold text-foreground tabular-nums">
+                            {pct}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* ABOUT — 6 cols */}
+              {!hideSections.includes("about") && aboutText && (
+                <div className="pf-glass-card pf-bento-6 p-6">
+                  <span className="text-sm font-semibold text-foreground block mb-3">
+                    About
                   </span>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-[55ch] whitespace-pre-wrap">
+                    {aboutText}
+                  </p>
+                </div>
+              )}
+
+              {/* TECH STACK — 6 cols */}
+              {!hideSections.includes("stack") && techStack.length > 0 && (
+                <div className="pf-glass-card pf-bento-6 p-6">
+                  <span className="text-sm font-semibold text-foreground block mb-4">
+                    Tech stack
+                  </span>
+                  {Object.entries(techByCategory).map(([cat, items]) => (
+                    <div key={cat} className="mb-3 last:mb-0">
+                      {Object.keys(techByCategory).length > 1 && (
+                        <p className="text-xs font-medium text-muted-foreground mb-2">
+                          {cat}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {items.map((name) => (
+                          <span
+                            key={name}
+                            className="px-2.5 py-1 rounded-lg bg-white/50 dark:bg-white/[0.08] border border-white/70 dark:border-white/[0.12] text-xs font-medium text-foreground"
+                          >
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* LINKS — full width */}
+              {!hideSections.includes("links") &&
+                (settings.customLinks ?? []).length > 0 && (
+                  <div className="pf-glass-card pf-bento-wide p-6">
+                    <span className="text-sm font-semibold text-foreground block mb-4">
+                      Links
+                    </span>
+                    <div className="flex flex-wrap gap-2.5">
+                      {(settings.customLinks ?? []).map((link) => (
+                        <a
+                          key={link.url}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pf-chip hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                        >
+                          <ArrowSquareOut
+                            weight="bold"
+                            className="w-3.5 h-3.5"
+                          />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {user.website && (
-                  <a
-                    href={user.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 label hover:text-foreground transition-colors"
-                  >
-                    <Globe weight="regular" className="w-3.5 h-3.5" />
-                    {user.website.replace(/^https?:\/\//, "")}
-                  </a>
-                )}
-                {settings.showEmail && user.email && (
-                  <a
-                    href={`mailto:${user.email}`}
-                    className="flex items-center gap-1.5 label hover:text-foreground transition-colors"
-                  >
-                    <EnvelopeSimple weight="regular" className="w-3.5 h-3.5" />
-                    {user.email}
-                  </a>
-                )}
-              </div>
             </div>
-          </div>
-        </header>
+          </main>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          {sectionOrder.map((id) => renderSection(id))}
-        </main>
-
-        {/* ── FOOTER ───────────────────────────── */}
-        <footer className="border-t border-border mt-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between flex-wrap gap-4">
-            <span className="label text-foreground">
+          {/* ── FOOTER */}
+          <footer className="max-w-5xl mx-auto px-4 sm:px-6 pb-8 mt-4 flex items-center justify-between flex-wrap gap-4">
+            <span className="text-xs text-muted-foreground">
               {user.username}.initmyfolio.com
             </span>
             <Link
               href="https://initmyfolio.com"
               target="_blank"
-              className="label hover:text-foreground transition-colors"
+              rel="noopener noreferrer"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              POWERED BY INITMYFOLIO
+              Built with initmyfolio
             </Link>
-          </div>
-        </footer>
-      </div>
+          </footer>
+        </div>
+      ) : (
+        /* ══════════════════════════════════════════
+           DEFAULT LAYOUT (brutalist / clean / editorial)
+           ══════════════════════════════════════════ */
+        <div
+          className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
+        >
+          {/* ── NAV */}
+          <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 label hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  INITMYFOLIO
+                </Link>
+                <span className="label hidden sm:block">///</span>
+                <span className="label hidden sm:block text-foreground">
+                  {user.username}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://github.com/${user.username}`}
+                  target="_blank"
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-border text-[11px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground transition-colors active:scale-[0.98]"
+                >
+                  <GithubLogo weight="regular" className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">GITHUB</span>
+                </a>
+                <ThemeToggle />
+              </div>
+            </div>
+          </nav>
+
+          {/* ── HERO */}
+          <header className="border-b border-border">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-0">
+              <div className="overflow-hidden">{heroNameContent}</div>
+              <div className="border-t border-border py-4 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 sm:items-center">
+                <div className="flex items-start gap-3 sm:contents">
+                  {showAvatar && user.avatarUrl && (
+                    <Image
+                      src={user.avatarUrl}
+                      alt={displayName}
+                      width={32}
+                      height={32}
+                      className="rounded-full border border-border shrink-0"
+                    />
+                  )}
+                  <div className="flex flex-col gap-1.5">
+                    {user.bio && (
+                      <p className="text-xs text-muted-foreground">
+                        {user.bio}
+                      </p>
+                    )}
+                    {availability && AVAILABILITY_CONFIG[availability] && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-mono uppercase tracking-widest w-fit ${AVAILABILITY_CONFIG[availability].color}`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        {AVAILABILITY_CONFIG[availability].label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 flex-wrap sm:ml-auto">
+                  {user.location && (
+                    <span className="flex items-center gap-1.5 label">
+                      <MapPin weight="regular" className="w-3.5 h-3.5" />
+                      {user.location}
+                    </span>
+                  )}
+                  {user.website && (
+                    <a
+                      href={user.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 label hover:text-foreground transition-colors"
+                    >
+                      <Globe weight="regular" className="w-3.5 h-3.5" />
+                      {user.website.replace(/^https?:\/\//, "")}
+                    </a>
+                  )}
+                  {settings.showEmail && user.email && (
+                    <a
+                      href={`mailto:${user.email}`}
+                      className="flex items-center gap-1.5 label hover:text-foreground transition-colors"
+                    >
+                      <EnvelopeSimple
+                        weight="regular"
+                        className="w-3.5 h-3.5"
+                      />
+                      {user.email}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            {sectionOrder.map((id) => renderSection(id))}
+          </main>
+
+          <footer className="border-t border-border mt-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+              <span className="label text-foreground">
+                {user.username}.initmyfolio.com
+              </span>
+              <Link
+                href="https://initmyfolio.com"
+                target="_blank"
+                className="label hover:text-foreground transition-colors"
+              >
+                POWERED BY INITMYFOLIO
+              </Link>
+            </div>
+          </footer>
+        </div>
+      )}
     </>
   );
 }
