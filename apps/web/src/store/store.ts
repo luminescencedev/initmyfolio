@@ -10,14 +10,33 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storageSession from "redux-persist/lib/storage/session";
+import type { Storage } from "redux-persist";
 import rootReducer from "@/store/root.reducer";
 import rootSaga from "@/store/root.saga";
 
+// SSR-safe sessionStorage wrapper — redux-persist/lib/storage/session
+// accesses sessionStorage at import time which throws on the server.
+const sessionStorageSSR: Storage = {
+  getItem: (key) => {
+    if (typeof window === "undefined") return Promise.resolve(null);
+    return Promise.resolve(window.sessionStorage.getItem(key));
+  },
+  setItem: (key, value) => {
+    if (typeof window === "undefined") return Promise.resolve();
+    window.sessionStorage.setItem(key, value);
+    return Promise.resolve();
+  },
+  removeItem: (key) => {
+    if (typeof window === "undefined") return Promise.resolve();
+    window.sessionStorage.removeItem(key);
+    return Promise.resolve();
+  },
+};
+
 const persistConfig = {
   key: "initmyfolio",
-  storage: storageSession,
-  whitelist: ["user"], // persist user slice for the session
+  storage: sessionStorageSSR,
+  whitelist: ["user"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
