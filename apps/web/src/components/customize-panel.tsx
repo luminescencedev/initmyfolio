@@ -554,7 +554,7 @@ export function CustomizePanel({ user, token, onSettingsSaved }: Props) {
             >
               NONE
             </button>
-            {(user.githubData?.repos ?? [])
+            {[...(user.githubData?.repos ?? [])]
               .sort((a, b) => b.stargazers_count - a.stargazers_count)
               .slice(0, 12)
               .map((repo) => (
