@@ -1129,15 +1129,15 @@ export default async function PortfolioPage({ params }: Props) {
           {/* ── FOOTER */}
           <footer className="max-w-5xl mx-auto px-4 sm:px-6 pb-8 mt-4 flex items-center justify-between flex-wrap gap-4">
             <span className="text-xs text-muted-foreground">
-              {user.username}.initmyfolio.com
+              {canonicalUrl.replace("https://", "")}
             </span>
             <Link
-              href="https://initmyfolio.com"
+              href={appUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              Built with initmyfolio
+              Built with InitMyFolio
             </Link>
           </footer>
         </div>
@@ -1248,10 +1248,10 @@ export default async function PortfolioPage({ params }: Props) {
           <footer className="border-t border-border mt-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between flex-wrap gap-4">
               <span className="label text-foreground">
-                {user.username}.initmyfolio.com
+                {canonicalUrl.replace("https://", "")}
               </span>
               <Link
-                href="https://initmyfolio.com"
+                href={appUrl}
                 target="_blank"
                 className="label hover:text-foreground transition-colors"
               >
