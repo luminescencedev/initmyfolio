@@ -26,7 +26,10 @@ export const selectSyncRateLimitedUntil = createSelector(
   selectUserState,
   (s) => s.syncRateLimitedUntil,
 );
-
+export const selectPreviewRefreshAt = createSelector(
+  selectUserState,
+  (s) => s.previewRefreshAt,
+);
 export const selectCanSync = createSelector(
   selectIsSyncing,
   selectSyncRateLimitedUntil,

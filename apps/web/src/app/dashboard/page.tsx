@@ -36,17 +36,34 @@ import {
   selectIsSyncing,
   selectSyncMessage,
   selectCanSync,
+  selectPreviewRefreshAt,
 } from "@/store/selectors/user.selector";
 import { purgePersistedStore } from "@/store/store";
 
 const APP_URL = process.env["NEXT_PUBLIC_APP_URL"] ?? "http://localhost:3000";
 
 /* --- Portfolio preview iframe --- */
-function PortfolioPreview({ url }: { url: string }) {
+function PortfolioPreview({
+  url,
+  externalKey,
+}: {
+  url: string;
+  externalKey?: number | null;
+}) {
   const [loaded, setLoaded] = useState(false);
   const [key, setKey] = useState(0);
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const prevExternalKeyRef = useRef(externalKey);
+
+  // Auto-reload when externalKey changes (settings saved / sync completed)
+  useEffect(() => {
+    if (externalKey !== prevExternalKeyRef.current) {
+      prevExternalKeyRef.current = externalKey;
+      setLoaded(false);
+      setKey((k) => k + 1);
+    }
+  }, [externalKey]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -145,6 +162,7 @@ function DashboardContent() {
   const isSyncing = useAppSelector(selectIsSyncing);
   const syncMessage = useAppSelector(selectSyncMessage);
   const canSync = useAppSelector(selectCanSync);
+  const previewRefreshAt = useAppSelector(selectPreviewRefreshAt);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -581,7 +599,10 @@ function DashboardContent() {
               delay: 0.1,
             }}
           >
-            <PortfolioPreview url={portfolioUrl} />
+            <PortfolioPreview
+              url={portfolioUrl}
+              externalKey={previewRefreshAt}
+            />
           </motion.div>
 
           {/* Quick actions */}

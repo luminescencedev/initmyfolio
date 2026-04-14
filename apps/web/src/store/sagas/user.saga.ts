@@ -1,6 +1,10 @@
 import { call, put, select, delay } from "redux-saga/effects";
 import type { SagaIterator } from "redux-saga";
-import { getCurrentUser, triggerSync } from "@/lib/api";
+import {
+  getCurrentUser,
+  triggerSync,
+  revalidatePortfolioCache,
+} from "@/lib/api";
 import type { PortfolioUser } from "@/lib/api";
 import {
   setUser,
@@ -8,6 +12,7 @@ import {
   setSyncMessage,
   setLastSyncedAt,
   setSyncRateLimitedUntil,
+  setPreviewRefreshAt,
   fetchUserRequested,
 } from "@/store/slices/user.slice";
 import { selectToken, selectUser } from "@/store/selectors/user.selector";
@@ -46,6 +51,9 @@ function* syncWorker(): SagaIterator {
     );
     yield put(setLastSyncedAt(Date.now()));
     yield call(fetchUserWorker, token);
+    // Revalidate portfolio ISR cache + trigger preview refresh
+    yield call(revalidatePortfolioCache, token);
+    yield put(setPreviewRefreshAt(Date.now()));
     yield delay(4000);
     yield put(setSyncMessage(null));
   } else if (result.rateLimited && result.availableAt) {

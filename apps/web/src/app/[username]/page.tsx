@@ -88,7 +88,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const revalidate = 60; // 1-minute fallback; settings changes bust cache immediately via /api/revalidate
+// ISR fallback: regenerate at most once per hour.
+// On-demand revalidation via /api/revalidate (settings save, sync) is instant.
+export const revalidate = 3600;
 
 function getLinkBrand(url: string): {
   name: string;

@@ -66,7 +66,7 @@ export async function getPortfolioUser(
 ): Promise<PortfolioUser | null> {
   try {
     const res = await fetch(`${API_URL}/api/users/${username}`, {
-      next: { revalidate: 3600 }, // ISR: revalidate every hour
+      next: { revalidate: 3600 }, // Data cache — purged by revalidatePath on settings save / sync
     });
 
     if (!res.ok) {
@@ -127,6 +127,17 @@ export async function updateSettings(
   } catch {
     return false;
   }
+}
+
+/** Bust the Next.js ISR + Data Cache for a user's portfolio page. */
+export async function revalidatePortfolioCache(token: string): Promise<void> {
+  await fetch(`/api/revalidate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }).catch(() => {});
 }
 
 export interface SyncResult {

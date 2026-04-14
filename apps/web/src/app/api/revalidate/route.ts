@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
+  // revalidatePath purges both the Full Route Cache (ISR) and the
+  // Data Cache for all fetch() calls within that path — no need for
+  // revalidateTag separately.
   revalidatePath(`/${username}`);
 
   return NextResponse.json({ revalidated: true });

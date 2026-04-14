@@ -18,6 +18,14 @@ import {
 } from "@phosphor-icons/react";
 import type { PortfolioUser } from "@/lib/api";
 import { getCurrentUser, updateSettings } from "@/lib/api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setUser,
+  setPreviewRefreshAt,
+  clearUser,
+} from "@/store/slices/user.slice";
+import { selectToken, selectUser } from "@/store/selectors/user.selector";
+import { purgePersistedStore } from "@/store/store";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type UserSettings = PortfolioUser["settings"];
@@ -276,9 +284,8 @@ function FieldBlock({
 
 /* ── Main settings form ──────────────────────────────────── */
 function SettingsContent() {
-  const [user, setUser] = useState<PortfolioUser | null>(null);
+  const [user, setUserState] = useState<PortfolioUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
   const [local, setLocal] = useState<UserSettings>({});
   const [isDirty, setIsDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<
@@ -286,9 +293,17 @@ function SettingsContent() {
   >("idle");
   const [activeSection, setActiveSection] =
     useState<(typeof NAV_SECTIONS)[number]["id"]>("appearance");
+  const dispatch = useAppDispatch();
+  const reduxToken = useAppSelector(selectToken);
+  const reduxUser = useAppSelector(selectUser);
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialSettings = useRef<UserSettings>({});
+
+  // Derive token: prefer Redux store, fall back to localStorage
+  const token =
+    reduxToken ??
+    (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
@@ -296,7 +311,14 @@ function SettingsContent() {
       router.push("/login");
       return;
     }
-    setToken(storedToken);
+    // If Redux already has the user, bootstrap from store (no extra fetch)
+    if (reduxUser) {
+      setUserState(reduxUser);
+      setLocal(reduxUser.settings ?? {});
+      initialSettings.current = reduxUser.settings ?? {};
+      setLoading(false);
+      return;
+    }
     getCurrentUser(storedToken).then((u) => {
       setLoading(false);
       if (!u) {
@@ -304,7 +326,7 @@ function SettingsContent() {
         router.push("/login");
         return;
       }
-      setUser(u);
+      setUserState(u);
       setLocal(u.settings ?? {});
       initialSettings.current = u.settings ?? {};
     });
@@ -327,6 +349,11 @@ function SettingsContent() {
       setSaveStatus("saved");
       setIsDirty(false);
       initialSettings.current = local;
+      // Update Redux store so the dashboard preview is immediately fresh
+      const updatedUser = { ...user, settings: local };
+      setUserState(updatedUser);
+      dispatch(setUser(updatedUser));
+      dispatch(setPreviewRefreshAt(Date.now()));
       setTimeout(() => setSaveStatus("idle"), 2500);
     } else {
       setSaveStatus("error");
@@ -480,6 +507,8 @@ function SettingsContent() {
             <button
               onClick={() => {
                 localStorage.removeItem("auth_token");
+                dispatch(clearUser());
+                purgePersistedStore();
                 router.push("/");
               }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"

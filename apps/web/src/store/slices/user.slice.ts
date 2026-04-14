@@ -15,6 +15,7 @@ export interface UserState {
   } | null;
   lastSyncedAt: number | null;
   syncRateLimitedUntil: number | null;
+  previewRefreshAt: number | null;
 }
 
 const initialState: UserState = {
@@ -25,6 +26,7 @@ const initialState: UserState = {
   syncMessage: null,
   lastSyncedAt: null,
   syncRateLimitedUntil: null,
+  previewRefreshAt: null,
 };
 
 const userSlice = createSlice({
@@ -49,6 +51,9 @@ const userSlice = createSlice({
     },
     setSyncRateLimitedUntil(state, action: PayloadAction<number | null>) {
       state.syncRateLimitedUntil = action.payload;
+    },
+    setPreviewRefreshAt(state, action: PayloadAction<number>) {
+      state.previewRefreshAt = action.payload;
     },
     clearUser() {
       return initialState;
@@ -76,6 +81,7 @@ export const {
   setSyncMessage,
   setLastSyncedAt,
   setSyncRateLimitedUntil,
+  setPreviewRefreshAt,
   clearUser,
 } = userSlice.actions;
 
