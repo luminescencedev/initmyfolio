@@ -140,7 +140,7 @@ export default async function PortfolioPage({ params }: Props) {
   const featuredRepoName = settings.featuredRepo ?? null;
 
   /* ── Glass flag ──────────────────────────────────── */
-  const isGlass = settings.layoutVariant === "glass";
+  const isGlass = !settings.layoutVariant || settings.layoutVariant === "glass";
 
   /* ── Repo sorting ─────────────────────────────── */
   const sortedRepos = (() => {

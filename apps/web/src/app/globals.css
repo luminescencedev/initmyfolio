@@ -131,6 +131,18 @@
     font-feature-settings:
       "kern" 1,
       "liga" 1;
+    /* Subtle ambient gradient — gives all app pages a premium depth */
+    background-image:
+      radial-gradient(
+        ellipse 70% 50% at 10% -5%,
+        hsl(var(--primary) / 0.05) 0%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 50% 60% at 90% 105%,
+        hsl(var(--primary) / 0.04) 0%,
+        transparent 65%
+      );
     transition:
       background-color 0.3s ease,
       color 0.3s ease;

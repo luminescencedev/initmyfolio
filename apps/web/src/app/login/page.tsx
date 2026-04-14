@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import {
   GithubLogo,
   WarningCircle,
-  ArrowLeft,
   Spinner,
   ShieldCheck,
   Lock,
@@ -50,7 +49,10 @@ function LoginContent() {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-          <Spinner weight="bold" className="w-4 h-4 animate-spin text-primary" />
+          <Spinner
+            weight="bold"
+            className="w-4 h-4 animate-spin text-primary"
+          />
           Checking session…
         </div>
       </div>
@@ -58,28 +60,31 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
-      {/* Floating nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-5">
-        <div className="max-w-5xl mx-auto flex items-center justify-between px-5 py-3 rounded-2xl border border-border/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-sm">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            initmyfolio
-          </Link>
-          <ThemeToggle />
-        </div>
-      </nav>
+    <div className="min-h-dvh flex flex-col">
+      {/* Ambient blobs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-primary/6 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-primary/4 rounded-full blur-3xl" />
+      </div>
+
+      {/* Minimal header row */}
+      <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-foreground/80 hover:text-foreground transition-colors"
+        >
+          InitMyFolio
+        </Link>
+        <ThemeToggle />
+      </div>
 
       {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-4 pt-28 pb-12">
+      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-[400px]">
           {/* Glass card */}
-          <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+          <div className="rounded-3xl border border-white/60 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.07)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden">
             <div className="px-8 pt-8 pb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
                 <GithubLogo weight="bold" className="w-5 h-5 text-primary" />
               </div>
               <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1.5">
@@ -93,7 +98,7 @@ function LoginContent() {
 
             <div className="px-8 pb-8 space-y-4">
               {/* Permission info */}
-              <div className="rounded-xl border border-border bg-secondary/50 divide-y divide-border/60">
+              <div className="rounded-xl border border-border/60 bg-secondary/40 divide-y divide-border/50">
                 {[
                   {
                     icon: ShieldCheck,
@@ -111,8 +116,11 @@ function LoginContent() {
                     detail: "Re-authenticate anytime",
                   },
                 ].map(({ icon: Icon, label, detail }) => (
-                  <div key={label} className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center shrink-0 border border-border/50">
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 px-4 py-3"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-background/80 flex items-center justify-center shrink-0 border border-border/40">
                       <Icon
                         weight="regular"
                         className="w-3.5 h-3.5 text-muted-foreground"
