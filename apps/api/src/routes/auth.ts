@@ -1,6 +1,10 @@
 import { Hono } from "hono";
 import { prisma } from "@initmyfolio/db";
-import { fetchGitHubUser, aggregateGitHubData } from "../lib/github.js";
+import {
+  fetchGitHubUser,
+  aggregateGitHubData,
+  toStoredProfile,
+} from "../lib/github.js";
 import { signToken } from "../lib/jwt.js";
 
 export const authRouter = new Hono();
@@ -136,11 +140,12 @@ authRouter.get("/github/callback", async (c) => {
     // Get GitHub user profile (1 fast API call, ~200 ms)
     const githubUser = await fetchGitHubUser(accessToken);
 
-    // Seed githubData with profile so new users see something immediately.
+    // Seed githubData with stripped profile so new users see something immediately.
+    // Full data arrives via the background aggregation below.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const profileSeed = JSON.parse(
       JSON.stringify({
-        profile: githubUser,
+        profile: toStoredProfile(githubUser),
         repos: [],
         languages: {},
         totalStars: 0,
@@ -184,12 +189,20 @@ authRouter.get("/github/callback", async (c) => {
 
     // Fire-and-forget full repo + language aggregation in the background.
     aggregateGitHubData(githubUser.login, accessToken)
-      .then(async (githubData) => {
+      .then(async ({ stored, userUpdate }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const json = JSON.parse(JSON.stringify(githubData)) as any;
+        const json = JSON.parse(JSON.stringify(stored)) as any;
         await prisma.user.update({
           where: { id: user.id },
-          data: { githubData: json, lastSyncedAt: new Date() },
+          data: {
+            githubData: json,
+            displayName: userUpdate.displayName ?? githubUser.login,
+            bio: userUpdate.bio,
+            avatarUrl: userUpdate.avatarUrl,
+            location: userUpdate.location,
+            website: userUpdate.website,
+            lastSyncedAt: new Date(),
+          },
         });
       })
       .catch((err) => console.error("[Auth] Background sync failed:", err));
@@ -233,7 +246,6 @@ authRouter.get("/me", async (c) => {
       githubData: true,
       settings: true,
       lastSyncedAt: true,
-      createdAt: true,
     },
   });
 

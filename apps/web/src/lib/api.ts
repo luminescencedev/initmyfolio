@@ -11,22 +11,19 @@ export interface PortfolioUser {
   email: string | null;
   githubData: {
     profile: {
-      login: string;
       public_repos: number;
       followers: number;
-      following: number;
     };
     repos: Array<{
       id: number;
       name: string;
-      full_name: string;
-      description: string | null;
       html_url: string;
-      homepage: string | null;
+      description: string | null;
       stargazers_count: number;
       forks_count: number;
       language: string | null;
       topics: string[];
+      homepage: string | null;
     }>;
     languages: Record<string, number>;
     totalStars: number;
@@ -58,7 +55,6 @@ export interface PortfolioUser {
     featuredRepo?: string | null;
   };
   lastSyncedAt: string | null;
-  createdAt: string;
 }
 
 export async function getPortfolioUser(

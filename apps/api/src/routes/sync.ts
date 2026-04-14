@@ -46,7 +46,7 @@ syncRouter.post("/:username", async (c) => {
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
     if (user.lastSyncedAt > fiveMinsAgo) {
       const retryAfter = Math.ceil(
-        (user.lastSyncedAt.getTime() + 5 * 60 * 1000 - Date.now()) / 1000
+        (user.lastSyncedAt.getTime() + 5 * 60 * 1000 - Date.now()) / 1000,
       );
       return c.json(
         {
@@ -54,25 +54,25 @@ syncRouter.post("/:username", async (c) => {
           retryAfter,
           availableAt: new Date(user.lastSyncedAt.getTime() + 5 * 60 * 1000),
         },
-        429
+        429,
       );
     }
   }
 
   try {
-    const githubData = await aggregateGitHubData(username);
+    const { stored, userUpdate } = await aggregateGitHubData(username);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const githubDataJson = JSON.parse(JSON.stringify(githubData)) as any;
+    const githubDataJson = JSON.parse(JSON.stringify(stored)) as any;
 
     const updated = await prisma.user.update({
       where: { username },
       data: {
         githubData: githubDataJson,
-        displayName: githubData.profile.name ?? username,
-        bio: githubData.profile.bio,
-        avatarUrl: githubData.profile.avatar_url,
-        location: githubData.profile.location,
-        website: githubData.profile.blog,
+        displayName: userUpdate.displayName ?? username,
+        bio: userUpdate.bio,
+        avatarUrl: userUpdate.avatarUrl,
+        location: userUpdate.location,
+        website: userUpdate.website,
         lastSyncedAt: new Date(),
       },
       select: {
@@ -84,7 +84,7 @@ syncRouter.post("/:username", async (c) => {
     return c.json({
       success: true,
       user: updated,
-      repoCount: githubData.repos.length,
+      repoCount: stored.repos.length,
     });
   } catch (err) {
     console.error(`[Sync] Failed for ${username}:`, err);

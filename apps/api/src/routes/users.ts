@@ -29,7 +29,6 @@ usersRouter.get(
         githubData: true,
         settings: true,
         lastSyncedAt: true,
-        createdAt: true,
       },
     });
 
