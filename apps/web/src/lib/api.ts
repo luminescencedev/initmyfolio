@@ -121,6 +121,7 @@ export async function updateSettings(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({ username }),
     }).catch(() => {});
     return true;
   } catch {

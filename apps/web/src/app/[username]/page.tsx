@@ -62,8 +62,9 @@ const AVAILABILITY_CONFIG = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const user = await getUser(username);
-  if (!user) return { title: "PORTFOLIO NOT FOUND // INITMYFOLIO" };
-  const title = `${(user.displayName ?? user.username).toUpperCase()} // INITMYFOLIO`;
+  if (!user) return { title: "Portfolio not found — initmyfolio" };
+  const name = user.displayName ?? user.username;
+  const title = `${name} — initmyfolio`;
   const description =
     user.bio ??
     `${user.username} — ${user.githubData?.profile?.public_repos ?? 0} repos, ${formatNumber(user.githubData?.totalStars ?? 0)} stars.`;
@@ -87,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const revalidate = 3600;
+export const revalidate = 60; // 1-minute fallback; settings changes bust cache immediately via /api/revalidate
 
 function getLinkBrand(url: string): {
   name: string;
@@ -675,26 +676,36 @@ export default async function PortfolioPage({ params }: Props) {
               <span className="label">[ LINKS ]</span>
             </div>
             <div className="divide-y divide-border">
-              {(settings.customLinks ?? []).map((link) => (
-                <a
-                  key={link.url}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-3 hover:bg-muted transition-colors group"
-                >
-                  <ArrowSquareOut
-                    weight="regular"
-                    className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
-                  />
-                  <span className="label text-foreground group-hover:underline">
-                    {link.label}
-                  </span>
-                  <span className="label text-muted-foreground ml-auto truncate text-right">
-                    {link.url.replace(/^https?:\/\//, "")}
-                  </span>
-                </a>
-              ))}
+              {(settings.customLinks ?? []).map((link) => {
+                const brand = getLinkBrand(link.url);
+                const BrandIcon = brand.Icon;
+                return (
+                  <a
+                    key={link.url}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-5 py-3 hover:bg-muted transition-colors group"
+                  >
+                    <span
+                      className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                      style={{ background: brand.bg + "18", color: brand.bg }}
+                    >
+                      <BrandIcon weight="fill" className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="label text-foreground group-hover:underline flex-1">
+                      {link.label}
+                    </span>
+                    <span className="label text-muted-foreground truncate text-right hidden sm:block max-w-60">
+                      {link.url.replace(/^https?:\/\//, "")}
+                    </span>
+                    <ArrowSquareOut
+                      weight="regular"
+                      className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-60 transition-opacity shrink-0"
+                    />
+                  </a>
+                );
+              })}
             </div>
           </section>
         );

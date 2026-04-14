@@ -25,6 +25,7 @@ usersRouter.get(
         avatarUrl: true,
         location: true,
         website: true,
+        email: true,
         githubData: true,
         settings: true,
         lastSyncedAt: true,
