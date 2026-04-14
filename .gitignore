@@ -37,6 +37,10 @@ Thumbs.db
 *.swp
 *.swo
 
+# Local tooling
+.claude
+.github
+
 # Prisma
 packages/db/node_modules
 

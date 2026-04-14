@@ -347,6 +347,15 @@ function Reveal({
 
 /* ─── Main landing page ───────────────────────────────── */
 export default function LandingPage() {
+  const APP_URL = process.env["NEXT_PUBLIC_APP_URL"] ?? "";
+  const APP_DOMAIN = process.env["NEXT_PUBLIC_APP_DOMAIN"] ?? "";
+  const usesCustomDomain =
+    !!APP_DOMAIN &&
+    !APP_DOMAIN.includes("localhost") &&
+    !APP_DOMAIN.includes("vercel.app");
+  const exampleUrl = usesCustomDomain
+    ? `username.${APP_DOMAIN}`
+    : `${APP_URL}/username`;
   return (
     <div className="min-h-dvh bg-background">
       {/* ── NAV ─────────────────────────────────────────── */}
@@ -434,7 +443,7 @@ export default function LandingPage() {
             >
               Connect once. Get your own portfolio page at{" "}
               <code className="text-foreground bg-secondary px-1.5 py-0.5 rounded-md text-sm font-mono">
-                username.initmyfolio.com
+                {exampleUrl}
               </code>{" "}
               in seconds. Repos, languages, stats — fully automatic.
             </motion.p>
@@ -538,7 +547,7 @@ export default function LandingPage() {
               n: "03",
               icon: <Globe weight="regular" className="w-5 h-5" />,
               title: "Share",
-              desc: "Your portfolio is live at username.initmyfolio.com within 30 seconds. SEO-optimized, fast, with hourly data refresh.",
+              desc: `Your portfolio is live at ${exampleUrl} within 30 seconds. SEO-optimized, fast, with hourly data refresh.`,
             },
           ].map((step, i) => (
             <motion.div
@@ -768,7 +777,7 @@ export default function LandingPage() {
               features={[
                 { text: "Public portfolio page", included: true },
                 { text: "Auto-sync every 8 hours", included: true },
-                { text: "username.initmyfolio.com", included: true },
+                { text: exampleUrl, included: true },
                 { text: "All repos, languages, stats", included: true },
                 { text: "SEO + Open Graph", included: true },
                 { text: "Custom domain", included: false },
@@ -879,8 +888,9 @@ export default function LandingPage() {
               Terms
             </Link>
             <Link
-              href="https://github.com/yourusername/initmyfolio"
+              href="https://github.com/luminescencedev/initmyfolio"
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <GithubLogo className="w-3.5 h-3.5" /> Source
