@@ -433,6 +433,12 @@ body::after {
   .pf-bento-7 {
     grid-column: span 7;
   }
+  .pf-bento-9 {
+    grid-column: span 9;
+  }
+  .pf-bento-9 {
+    grid-column: span 9;
+  }
   .pf-bento-6 {
     grid-column: span 6;
   }

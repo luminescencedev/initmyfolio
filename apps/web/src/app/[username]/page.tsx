@@ -10,12 +10,21 @@ import {
   Star,
   GitFork,
   ArrowSquareOut,
-  ArrowLeft,
+  ArrowsOut,
+  XLogo,
+  YoutubeLogo,
+  LinkedinLogo,
+  InstagramLogo,
+  TiktokLogo,
+  DiscordLogo,
+  TwitchLogo,
+  SpotifyLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import { getPortfolioUser } from "@/lib/api";
 import { formatNumber, getLanguageColor } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ModalTile } from "@/components/modal-tile";
 
 // Memoize within a single request so generateMetadata and PortfolioPage
 // share one fetch instead of making two identical API calls.
@@ -79,6 +88,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export const revalidate = 3600;
+
+function getLinkBrand(url: string): {
+  name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Icon: React.ComponentType<any>;
+  bg: string;
+} {
+  if (/github\.com/i.test(url))
+    return { name: "GitHub", Icon: GithubLogo, bg: "#24292f" };
+  if (/twitter\.com|x\.com/i.test(url))
+    return { name: "X", Icon: XLogo, bg: "#000000" };
+  if (/youtube\.com|youtu\.be/i.test(url))
+    return { name: "YouTube", Icon: YoutubeLogo, bg: "#FF0000" };
+  if (/linkedin\.com/i.test(url))
+    return { name: "LinkedIn", Icon: LinkedinLogo, bg: "#0A66C2" };
+  if (/instagram\.com/i.test(url))
+    return { name: "Instagram", Icon: InstagramLogo, bg: "#E1306C" };
+  if (/tiktok\.com/i.test(url))
+    return { name: "TikTok", Icon: TiktokLogo, bg: "#010101" };
+  if (/discord\.(gg|com)/i.test(url))
+    return { name: "Discord", Icon: DiscordLogo, bg: "#5865F2" };
+  if (/twitch\.tv/i.test(url))
+    return { name: "Twitch", Icon: TwitchLogo, bg: "#9146FF" };
+  if (/spotify\.com/i.test(url))
+    return { name: "Spotify", Icon: SpotifyLogo, bg: "#1DB954" };
+  return { name: "Link", Icon: ArrowSquareOut, bg: "hsl(var(--primary))" };
+}
 
 export default async function PortfolioPage({ params }: Props) {
   const { username } = await params;
@@ -682,141 +718,96 @@ export default async function PortfolioPage({ params }: Props) {
         /* ══════════════════════════════════════════
            GLASS BENTO LAYOUT
            ══════════════════════════════════════════ */
-        <div className="theme-glass min-h-[100dvh]">
-          {/* ── NAV */}
-          <nav className="pf-glass-nav sticky top-0 z-50">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
-              >
-                <ArrowLeft weight="bold" className="w-4 h-4" />
-                initmyfolio
-              </Link>
-              <div className="flex items-center gap-2">
-                <a
-                  href={`https://github.com/${user.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pf-chip"
-                >
-                  <GithubLogo weight="fill" className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">GitHub</span>
-                </a>
-                <ThemeToggle />
-              </div>
-            </div>
-          </nav>
+        <div className="theme-glass min-h-dvh">
+          {/* ── FLOATING CONTROLS */}
+          <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+            <a
+              href={`https://github.com/${user.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pf-chip"
+            >
+              <GithubLogo weight="fill" className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+            <ThemeToggle />
+          </div>
 
           {/* ── BENTO GRID */}
           <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
             <div className="pf-bento-grid">
-              {/* HERO — full width */}
-              <div className="pf-glass-card pf-bento-wide p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+              {/* HERO — 9 cols, compact */}
+              <div className="pf-glass-card pf-bento-9 p-5 flex items-center gap-5">
                 {showAvatar && user.avatarUrl && (
                   <Image
                     src={user.avatarUrl}
                     alt={user.displayName ?? user.username}
-                    width={88}
-                    height={88}
+                    width={64}
+                    height={64}
                     className="rounded-2xl ring-2 ring-white/50 dark:ring-white/10 shrink-0"
                   />
                 )}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-1.5">
+                  <h1 className="text-xl font-bold tracking-tight text-foreground leading-tight">
                     {user.displayName ?? user.username}
                   </h1>
                   {user.bio && (
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 max-w-[55ch]">
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-1 mb-2.5 max-w-[50ch] line-clamp-2">
                       {user.bio}
                     </p>
                   )}
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     {availability && AVAILABILITY_CONFIG[availability] && (
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${AVAILABILITY_CONFIG[availability].color}`}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-medium ${AVAILABILITY_CONFIG[availability].color}`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                         {AVAILABILITY_CONFIG[availability].label.toLowerCase()}
                       </span>
                     )}
                     {user.location && (
-                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin weight="fill" className="w-3.5 h-3.5" />
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <MapPin weight="fill" className="w-3 h-3" />
                         {user.location}
                       </span>
-                    )}
-                    {user.website && (
-                      <a
-                        href={user.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Globe weight="fill" className="w-3.5 h-3.5" />
-                        {user.website.replace(/^https?:\/\//, "")}
-                      </a>
                     )}
                     {settings.showEmail && user.email && (
                       <a
                         href={`mailto:${user.email}`}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <EnvelopeSimple weight="fill" className="w-3.5 h-3.5" />
+                        <EnvelopeSimple weight="fill" className="w-3 h-3" />
                         {user.email}
                       </a>
                     )}
                   </div>
                 </div>
-                <a
-                  href={`https://github.com/${user.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pf-chip shrink-0 self-start sm:self-center"
-                >
-                  <GithubLogo weight="fill" className="w-4 h-4" />
-                  View profile
-                </a>
               </div>
 
-              {/* STATS — 4 tiles × 3 cols = full row at lg */}
-              {!hideSections.includes("stats") &&
-                (
-                  [
-                    {
-                      val: formatNumber(
-                        user.githubData?.profile?.public_repos ?? 0,
-                      ),
-                      label: "Repos",
-                    },
-                    {
-                      val: formatNumber(user.githubData?.totalStars ?? 0),
-                      label: "Stars",
-                    },
-                    {
-                      val: formatNumber(user.githubData?.totalForks ?? 0),
-                      label: "Forks",
-                    },
-                    {
-                      val: formatNumber(
-                        user.githubData?.profile?.followers ?? 0,
-                      ),
-                      label: "Followers",
-                    },
-                  ] as const
-                ).map(({ val, label }) => (
-                  <div
-                    key={label}
-                    className="pf-glass-card pf-bento-3 p-5 flex flex-col justify-between gap-2"
-                  >
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      {label}
+              {/* WEBSITE — 3 cols companion (leaves air gap if absent) */}
+              {user.website && (
+                <a
+                  href={user.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pf-glass-card pf-bento-3 p-5 flex flex-col justify-between gap-3 group hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                >
+                  <Globe
+                    weight="fill"
+                    className="w-6 h-6 text-muted-foreground group-hover:text-foreground transition-colors"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-semibold text-foreground truncate">
+                      {user.website
+                        .replace(/^https?:\/\//, "")
+                        .replace(/\/$/, "")}
                     </span>
-                    <span className="text-3xl font-bold font-mono text-foreground tracking-tight tabular-nums">
-                      {val}
+                    <span className="text-[11px] text-muted-foreground">
+                      Website
                     </span>
                   </div>
-                ))}
+                </a>
+              )}
 
               {/* REPOS — 7 cols */}
               {!hideSections.includes("repos") &&
@@ -885,7 +876,7 @@ export default async function PortfolioPage({ params }: Props) {
                             {repo.name}
                           </span>
                           {repo.description && (
-                            <span className="text-xs text-muted-foreground truncate hidden lg:block max-w-[180px]">
+                            <span className="text-xs text-muted-foreground truncate hidden lg:block max-w-45">
                               {repo.description}
                             </span>
                           )}
@@ -902,7 +893,7 @@ export default async function PortfolioPage({ params }: Props) {
                   </div>
                 )}
 
-              {/* LANGUAGES — 5 cols */}
+              {/* LANGUAGES — 5 cols, pairs with repos(7) */}
               {!hideSections.includes("languages") &&
                 topLanguages.length > 0 && (
                   <div className="pf-glass-card pf-bento-5 p-6">
@@ -940,16 +931,30 @@ export default async function PortfolioPage({ params }: Props) {
                   </div>
                 )}
 
-              {/* ABOUT — 6 cols */}
+              {/* ABOUT — compact 3 cols, modal on click */}
               {!hideSections.includes("about") && aboutText && (
-                <div className="pf-glass-card pf-bento-6 p-6">
-                  <span className="text-sm font-semibold text-foreground block mb-3">
-                    About
-                  </span>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-[55ch] whitespace-pre-wrap">
+                <ModalTile
+                  title="About"
+                  className="pf-glass-card pf-bento-3 p-5 flex flex-col justify-between gap-3 text-left cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                  trigger={
+                    <>
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        About
+                      </span>
+                      <p className="text-sm text-foreground leading-snug line-clamp-3 flex-1">
+                        {aboutText}
+                      </p>
+                      <ArrowsOut
+                        weight="bold"
+                        className="w-3.5 h-3.5 text-muted-foreground self-end"
+                      />
+                    </>
+                  }
+                >
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     {aboutText}
                   </p>
-                </div>
+                </ModalTile>
               )}
 
               {/* TECH STACK — 6 cols */}
@@ -969,7 +974,7 @@ export default async function PortfolioPage({ params }: Props) {
                         {items.map((name) => (
                           <span
                             key={name}
-                            className="px-2.5 py-1 rounded-lg bg-white/50 dark:bg-white/[0.08] border border-white/70 dark:border-white/[0.12] text-xs font-medium text-foreground"
+                            className="px-2.5 py-1 rounded-lg bg-white/50 dark:bg-white/8 border border-white/70 dark:border-white/12 text-xs font-medium text-foreground"
                           >
                             {name}
                           </span>
@@ -980,32 +985,118 @@ export default async function PortfolioPage({ params }: Props) {
                 </div>
               )}
 
-              {/* LINKS — full width */}
-              {!hideSections.includes("links") &&
-                (settings.customLinks ?? []).length > 0 && (
-                  <div className="pf-glass-card pf-bento-wide p-6">
-                    <span className="text-sm font-semibold text-foreground block mb-4">
-                      Links
-                    </span>
-                    <div className="flex flex-wrap gap-2.5">
-                      {(settings.customLinks ?? []).map((link) => (
-                        <a
-                          key={link.url}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="pf-chip hover:scale-[1.02] active:scale-[0.98] transition-transform"
-                        >
-                          <ArrowSquareOut
-                            weight="bold"
-                            className="w-3.5 h-3.5"
+              {/* STATS — compact 3 cols, modal on click */}
+              {!hideSections.includes("stats") && (
+                <ModalTile
+                  title="GitHub activity"
+                  className="pf-glass-card pf-bento-3 p-5 flex flex-col justify-between gap-3 text-left cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                  trigger={
+                    <>
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        GitHub
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-3xl font-bold font-mono text-foreground tracking-tight tabular-nums">
+                          {formatNumber(user.githubData?.totalStars ?? 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Star
+                            weight="fill"
+                            className="w-3 h-3 text-amber-400"
                           />
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
+                          stars
+                        </span>
+                      </div>
+                      <ArrowsOut
+                        weight="bold"
+                        className="w-3.5 h-3.5 text-muted-foreground self-end"
+                      />
+                    </>
+                  }
+                >
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    {(
+                      [
+                        {
+                          val: formatNumber(
+                            user.githubData?.profile?.public_repos ?? 0,
+                          ),
+                          label: "Repos",
+                        },
+                        {
+                          val: formatNumber(user.githubData?.totalStars ?? 0),
+                          label: "Stars",
+                        },
+                        {
+                          val: formatNumber(user.githubData?.totalForks ?? 0),
+                          label: "Forks",
+                        },
+                        {
+                          val: formatNumber(
+                            user.githubData?.profile?.followers ?? 0,
+                          ),
+                          label: "Followers",
+                        },
+                      ] as const
+                    ).map(({ val, label }) => (
+                      <div key={label} className="flex flex-col gap-1">
+                        <span className="text-2xl font-bold font-mono text-foreground tracking-tight tabular-nums">
+                          {val}
+                        </span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                          {label}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </ModalTile>
+              )}
+
+              {/* LINKS — individual branded bento tiles */}
+              {!hideSections.includes("links") &&
+                (settings.customLinks ?? []).map((link) => {
+                  const brand = getLinkBrand(link.url);
+                  const BrandIcon = brand.Icon;
+                  return (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pf-glass-card pf-bento-3 p-5 flex flex-col gap-4 group hover:scale-[1.02] active:scale-[0.98] transition-transform overflow-hidden relative"
+                    >
+                      {/* brand color tint overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ background: brand.bg, opacity: 0.06 }}
+                      />
+                      {/* icon container */}
+                      <div
+                        className="relative w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{
+                          background: brand.bg + "20",
+                          color: brand.bg,
+                        }}
+                      >
+                        <BrandIcon weight="fill" className="w-6 h-6" />
+                      </div>
+                      {/* label */}
+                      <div className="relative flex-1 flex flex-col justify-end gap-0.5">
+                        <span className="text-sm font-semibold text-foreground leading-tight">
+                          {link.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {brand.name}
+                        </span>
+                      </div>
+                      {/* external arrow */}
+                      <ArrowSquareOut
+                        weight="bold"
+                        className="absolute top-4 right-4 w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-60 transition-opacity"
+                      />
+                    </a>
+                  );
+                })}
             </div>
           </main>
 
@@ -1029,23 +1120,13 @@ export default async function PortfolioPage({ params }: Props) {
            DEFAULT LAYOUT (brutalist / clean / editorial)
            ══════════════════════════════════════════ */
         <div
-          className={`min-h-[100dvh] bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
+          className={`min-h-dvh bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
         >
           {/* ── NAV */}
           <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link
-                  href="/"
-                  className="flex items-center gap-2 label hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  INITMYFOLIO
-                </Link>
-                <span className="label hidden sm:block">///</span>
-                <span className="label hidden sm:block text-foreground">
-                  {user.username}
-                </span>
+                <span className="label text-foreground">{user.username}</span>
               </div>
               <div className="flex items-center gap-2">
                 <a
