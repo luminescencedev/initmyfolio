@@ -32,12 +32,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Inline script in <head> — Server Component renders this into raw HTML.
+            Runs synchronously during browser parse, before React hydrates.
+            Prevents flash of wrong theme without any client-side warnings. */}
+        {/* eslint-disable-next-line @next/next/no-before-interactive-script-component */}
+        <script
+          // biome-ignore lint: intentional inline script for FOUC prevention
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(_){}`,
+          }}
+        />
+      </head>
       <body
         className={cn(
           GeistSans.variable,
           GeistMono.variable,
           archivoBlack.variable,
-          "min-h-[100dvh] bg-background font-sans antialiased",
+          "min-h-dvh bg-background font-sans antialiased",
         )}
       >
         {/* Skip navigation link — WCAG 2.4.1 Bypass Blocks */}
