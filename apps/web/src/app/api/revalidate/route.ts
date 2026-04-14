@@ -2,13 +2,16 @@ import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const rawSecret = process.env["JWT_SECRET"];
-if (!rawSecret) {
-  throw new Error("[JWT] JWT_SECRET environment variable is required");
-}
-const secret = new TextEncoder().encode(rawSecret);
-
 export async function POST(request: NextRequest) {
+  const rawSecret = process.env["JWT_SECRET"];
+  if (!rawSecret) {
+    return NextResponse.json(
+      { error: "Server misconfiguration" },
+      { status: 500 },
+    );
+  }
+  const secret = new TextEncoder().encode(rawSecret);
+
   // Verify the user's bearer token so only authenticated users can revalidate,
   // and only their own portfolio path.
   const authHeader = request.headers.get("Authorization");
