@@ -79,7 +79,10 @@ function LoginContent() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
+      <main
+        id="main-content"
+        className="relative z-10 flex-1 flex items-center justify-center px-4 py-12"
+      >
         <div className="w-full max-w-[400px]">
           {/* Glass card */}
           <div className="rounded-3xl border border-white/60 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.07)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden">
@@ -202,7 +205,7 @@ function LoginContent() {
             </Link>
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

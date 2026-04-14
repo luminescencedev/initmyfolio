@@ -18,12 +18,17 @@ export const metadata: Metadata = {
     default: "InitMyFolio — GitHub Portfolio Generator",
     template: "%s | InitMyFolio",
   },
-  description: "Generate a portfolio from your GitHub profile. Live in 30 seconds.",
+  description:
+    "Generate a portfolio from your GitHub profile. Live in 30 seconds.",
   openGraph: { type: "website", locale: "en_US", siteName: "InitMyFolio" },
   twitter: { card: "summary_large_image" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -31,9 +36,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           GeistSans.variable,
           GeistMono.variable,
           archivoBlack.variable,
-          "min-h-[100dvh] bg-background font-sans antialiased"
+          "min-h-[100dvh] bg-background font-sans antialiased",
         )}
       >
+        {/* Skip navigation link — WCAG 2.4.1 Bypass Blocks */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

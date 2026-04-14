@@ -20,15 +20,15 @@ function PortfolioPreview() {
       <div className="absolute -bottom-6 -left-6 w-36 h-36 bg-sky-400/8 dark:bg-sky-500/6 rounded-full blur-3xl pointer-events-none" />
 
       {/* Browser chrome */}
-      <div className="relative bg-zinc-100/80 dark:bg-zinc-900/80 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-elevated overflow-hidden backdrop-blur-sm">
+      <div className="relative bg-[hsl(220_20%_95%)] dark:bg-zinc-900 rounded-2xl border border-[hsl(220_20%_88%)] dark:border-zinc-800/60 shadow-elevated overflow-hidden">
         {/* URL bar */}
-        <div className="px-4 py-3 border-b border-zinc-200/80 dark:border-zinc-800 flex items-center gap-3">
+        <div className="px-4 py-3 border-b border-[hsl(220_20%_88%)] dark:border-zinc-800 flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
           </div>
-          <div className="flex-1 bg-white/60 dark:bg-zinc-800/60 rounded-md px-3 py-1 border border-zinc-200/60 dark:border-zinc-700/60">
+          <div className="flex-1 bg-white dark:bg-zinc-800/60 rounded-md px-3 py-1 border border-[hsl(220_20%_88%)] dark:border-zinc-700/60">
             <span className="text-[10px] font-mono text-muted-foreground">
               alexmorgan.initmyfolio.com
             </span>
@@ -187,7 +187,10 @@ function MarqueeStrip() {
   const doubled = [...items, ...items];
 
   return (
-    <div className="border-y border-border/60 bg-secondary/50 overflow-hidden py-3">
+    <div
+      aria-hidden="true"
+      className="border-y border-[hsl(220_14%_88%)] bg-[hsl(220_14%_95%)] dark:border-border/60 dark:bg-secondary/50 overflow-hidden py-3"
+    >
       <div className="marquee-track">
         {doubled.map((item, i) => (
           <span
@@ -303,7 +306,10 @@ export default function LandingPage() {
     <div className="min-h-[100dvh] bg-background">
       {/* ── NAV ─────────────────────────────────────────── */}
       <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
-        <nav className="max-w-5xl mx-auto bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/50 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+        <nav
+          aria-label="Main navigation"
+          className="max-w-5xl mx-auto bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/50 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+        >
           <div className="h-14 px-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               <span className="font-semibold text-sm text-foreground tracking-tight">
@@ -350,7 +356,11 @@ export default function LandingPage() {
       </div>
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-36 pb-16 md:pt-40 md:pb-24">
+      <section
+        id="main-content"
+        aria-label="Hero"
+        className="max-w-6xl mx-auto px-4 sm:px-6 pt-36 pb-16 md:pt-40 md:pb-24"
+      >
         <div className="grid md:grid-cols-[1fr_400px] gap-16 lg:gap-24 items-center">
           {/* Left: copy */}
           <div>
@@ -425,13 +435,17 @@ export default function LandingPage() {
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
       <section
         id="how-it-works"
+        aria-labelledby="how-it-works-heading"
         className="max-w-6xl mx-auto px-4 sm:px-6 py-24"
       >
         <div className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             How it works
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+          <h2
+            id="how-it-works-heading"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+          >
             Three steps. Zero config.
           </h2>
         </div>
@@ -461,7 +475,7 @@ export default function LandingPage() {
               key={step.n}
               className="grid md:grid-cols-[120px_1fr_1fr] gap-4 md:gap-12 py-10 items-start"
             >
-              <div className="font-mono text-6xl font-bold text-border leading-none select-none">
+              <div className="font-mono text-6xl font-bold text-[hsl(220_14%_88%)] dark:text-[hsl(220_14%_25%)] leading-none select-none">
                 {step.n}
               </div>
               <div className="flex items-center gap-3">
@@ -481,12 +495,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES BENTO ───────────────────────────────── */}
-      <section id="features" className="max-w-6xl mx-auto px-4 sm:px-6 pb-24">
+      <section
+        id="features"
+        aria-labelledby="features-heading"
+        className="max-w-6xl mx-auto px-4 sm:px-6 pb-24"
+      >
         <div className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             Architecture
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+          <h2
+            id="features-heading"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+          >
             Built for speed.
           </h2>
         </div>
@@ -597,12 +618,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────── */}
-      <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 pb-24">
+      <section
+        id="pricing"
+        aria-labelledby="pricing-heading"
+        className="max-w-6xl mx-auto px-4 sm:px-6 pb-24"
+      >
         <div className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             Pricing
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+          <h2
+            id="pricing-heading"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-foreground"
+          >
             Simple, honest pricing.
           </h2>
         </div>

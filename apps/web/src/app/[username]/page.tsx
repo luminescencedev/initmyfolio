@@ -734,7 +734,10 @@ export default async function PortfolioPage({ params }: Props) {
           </div>
 
           {/* ── BENTO GRID */}
-          <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <main
+            id="main-content"
+            className="max-w-5xl mx-auto px-4 sm:px-6 py-8"
+          >
             <div className="pf-bento-grid">
               {/* HERO — 9 cols, compact */}
               <div className="pf-glass-card pf-bento-9 p-5 flex items-center gap-5">
@@ -1123,7 +1126,10 @@ export default async function PortfolioPage({ params }: Props) {
           className={`min-h-dvh bg-background${settings.layoutVariant === "brutalist" ? " theme-brutalist" : settings.layoutVariant === "clean" ? " theme-clean" : settings.layoutVariant === "editorial" ? " theme-editorial" : ""}`}
         >
           {/* ── NAV */}
-          <nav className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+          <nav
+            aria-label="Portfolio navigation"
+            className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur-sm"
+          >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="label text-foreground">{user.username}</span>
@@ -1208,7 +1214,10 @@ export default async function PortfolioPage({ params }: Props) {
             </div>
           </header>
 
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <main
+            id="main-content"
+            className="max-w-7xl mx-auto px-4 sm:px-6 py-8"
+          >
             {sectionOrder.map((id) => renderSection(id))}
           </main>
 
