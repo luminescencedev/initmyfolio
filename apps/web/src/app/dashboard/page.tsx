@@ -576,75 +576,129 @@ function DashboardContent() {
           )}
 
           {/* Portfolio preview */}
-          <PortfolioPreview url={portfolioUrl} />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 24,
+              delay: 0.1,
+            }}
+          >
+            <PortfolioPreview url={portfolioUrl} />
+          </motion.div>
 
           {/* Quick actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group"
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: { staggerChildren: 0.08, delayChildren: 0.2 },
+              },
+            }}
+          >
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 14 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { type: "spring", stiffness: 270, damping: 24 },
+                },
+              }}
             >
-              <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                <Gear
-                  weight="regular"
-                  className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
-                />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Customize
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Layout, colors, sections
-                </p>
-              </div>
-            </Link>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group text-left"
-            >
-              <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                {copied ? (
-                  <Check weight="bold" className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy
+              <Link
+                href="/settings"
+                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group"
+              >
+                <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                  <Gear
                     weight="regular"
                     className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
                   />
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {copied ? "Copied!" : "Copy link"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Share your portfolio
-                </p>
-              </div>
-            </button>
-            <a
-              href={portfolioUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group"
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Customize
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Layout, colors, sections
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 14 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { type: "spring", stiffness: 270, damping: 24 },
+                },
+              }}
             >
-              <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                <ArrowSquareOut
-                  weight="regular"
-                  className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
-                />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Open live
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  View your live portfolio
-                </p>
-              </div>
-            </a>
-          </div>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group text-left"
+              >
+                <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                  {copied ? (
+                    <Check weight="bold" className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <Copy
+                      weight="regular"
+                      className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
+                    />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {copied ? "Copied!" : "Copy link"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Share your portfolio
+                  </p>
+                </div>
+              </button>
+            </motion.div>
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 14 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { type: "spring", stiffness: 270, damping: 24 },
+                },
+              }}
+            >
+              <a
+                href={portfolioUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-card shadow-card hover:bg-secondary/40 active:scale-[0.98] transition-all group"
+              >
+                <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                  <ArrowSquareOut
+                    weight="regular"
+                    className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Open live
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    View your live portfolio
+                  </p>
+                </div>
+              </a>
+            </motion.div>
+          </motion.div>
         </main>
       </div>
     </div>

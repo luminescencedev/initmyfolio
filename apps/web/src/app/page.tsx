@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "motion/react";
 import Link from "next/link";
 import {
   GithubLogo,
@@ -43,7 +46,7 @@ function PortfolioPreview() {
         <div className="bg-white dark:bg-zinc-950 p-5">
           {/* Profile header */}
           <div className="flex items-start gap-3 mb-5">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 shrink-0 shadow-sm" />
+            <div className="w-11 h-11 rounded-full bg-linear-to-br from-sky-400 to-indigo-500 shrink-0 shadow-sm" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-foreground">
                 Alex Morgan
@@ -300,10 +303,52 @@ function PricingCard({
   );
 }
 
+/* ─── Motion variants ───────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 270, damping: 24 },
+  },
+};
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.06 } },
+};
+
+/** Single-element scroll reveal — reuse everywhere for consistency */
+function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{
+        type: "spring",
+        stiffness: 270,
+        damping: 24,
+        delay,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 /* ─── Main landing page ───────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="min-h-dvh bg-background">
       {/* ── NAV ─────────────────────────────────────────── */}
       <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
         <nav
@@ -363,29 +408,41 @@ export default function LandingPage() {
       >
         <div className="grid md:grid-cols-[1fr_400px] gap-16 lg:gap-24 items-center">
           {/* Left: copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 dark:bg-primary/15 border border-primary/15 dark:border-primary/20 mb-6 animate-fade-up">
+          <motion.div variants={stagger} initial="hidden" animate="visible">
+            <motion.div
+              variants={fadeUp}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 dark:bg-primary/15 border border-primary/15 dark:border-primary/20 mb-6"
+            >
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               <span className="text-xs font-medium text-primary">
                 GitHub Portfolio Generator
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-bold tracking-tight leading-[1.05] text-foreground animate-fade-up delay-100">
+            <motion.h1
+              variants={fadeUp}
+              className="text-5xl md:text-6xl lg:text-[4.5rem] font-bold tracking-tight leading-[1.05] text-foreground"
+            >
               Turn your GitHub
               <br />
               <span className="text-primary">into a portfolio.</span>
-            </h1>
+            </motion.h1>
 
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-[46ch] animate-fade-up delay-200">
+            <motion.p
+              variants={fadeUp}
+              className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-[46ch]"
+            >
               Connect once. Get your own portfolio page at{" "}
               <code className="text-foreground bg-secondary px-1.5 py-0.5 rounded-md text-sm font-mono">
                 username.initmyfolio.com
               </code>{" "}
               in seconds. Repos, languages, stats — fully automatic.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-wrap items-center gap-3 mt-8 animate-fade-up delay-300">
+            <motion.div
+              variants={fadeUp}
+              className="flex flex-wrap items-center gap-3 mt-8"
+            >
               <Link
                 href="/login"
                 className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-all duration-200 active:scale-[0.97] shadow-[0_2px_8px_rgba(0,0,0,0.12)] group"
@@ -403,10 +460,13 @@ export default function LandingPage() {
               >
                 See how it works
               </a>
-            </div>
+            </motion.div>
 
             {/* Quick stats */}
-            <div className="flex items-center gap-6 mt-10 pt-8 border-t border-border/60 animate-fade-up delay-400">
+            <motion.div
+              variants={fadeUp}
+              className="flex items-center gap-6 mt-10 pt-8 border-t border-border/60"
+            >
               {[
                 ["< 30s", "Setup time"],
                 ["Hourly", "Auto-refresh"],
@@ -419,13 +479,23 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Right: preview */}
-          <div className="hidden md:block animate-fade-up delay-200">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 240,
+              damping: 22,
+              delay: 0.3,
+            }}
+            className="hidden md:block"
+          >
             <PortfolioPreview />
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -438,7 +508,7 @@ export default function LandingPage() {
         aria-labelledby="how-it-works-heading"
         className="max-w-6xl mx-auto px-4 sm:px-6 py-24"
       >
-        <div className="mb-14">
+        <Reveal className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             How it works
           </div>
@@ -448,7 +518,7 @@ export default function LandingPage() {
           >
             Three steps. Zero config.
           </h2>
-        </div>
+        </Reveal>
 
         <div className="space-y-0 divide-y divide-border/60">
           {[
@@ -470,9 +540,18 @@ export default function LandingPage() {
               title: "Share",
               desc: "Your portfolio is live at username.initmyfolio.com within 30 seconds. SEO-optimized, fast, with hourly data refresh.",
             },
-          ].map((step) => (
-            <div
+          ].map((step, i) => (
+            <motion.div
               key={step.n}
+              initial={{ opacity: 0, x: -14 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 24,
+                delay: i * 0.1,
+              }}
               className="grid md:grid-cols-[120px_1fr_1fr] gap-4 md:gap-12 py-10 items-start"
             >
               <div className="font-mono text-6xl font-bold text-[hsl(220_14%_88%)] dark:text-[hsl(220_14%_25%)] leading-none select-none">
@@ -489,7 +568,7 @@ export default function LandingPage() {
               <p className="text-sm text-muted-foreground leading-relaxed md:max-w-[44ch]">
                 {step.desc}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -500,7 +579,7 @@ export default function LandingPage() {
         aria-labelledby="features-heading"
         className="max-w-6xl mx-auto px-4 sm:px-6 pb-24"
       >
-        <div className="mb-14">
+        <Reveal className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             Architecture
           </div>
@@ -510,12 +589,18 @@ export default function LandingPage() {
           >
             Built for speed.
           </h2>
-        </div>
+        </Reveal>
 
         {/* Bento grid — 2/3 + 1/3, then 1/3 + 2/3 */}
         <div className="grid md:grid-cols-3 gap-4">
           {/* Large card: sync architecture */}
-          <div className="md:col-span-2 rounded-2xl border border-border bg-card p-8 shadow-card">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="md:col-span-2 rounded-2xl border border-border bg-card p-8 shadow-card"
+          >
             <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-5">
               Sync engine
             </div>
@@ -544,10 +629,21 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Small card: setup time */}
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-card flex flex-col justify-between">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 22,
+              delay: 0.08,
+            }}
+            className="rounded-2xl border border-border bg-card p-8 shadow-card flex flex-col justify-between"
+          >
             <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">
               Setup time
             </div>
@@ -562,10 +658,21 @@ export default function LandingPage() {
                 From GitHub OAuth to live portfolio page.
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Small card: auto sync */}
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-card flex flex-col justify-between">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 22,
+              delay: 0.12,
+            }}
+            className="rounded-2xl border border-border bg-card p-8 shadow-card flex flex-col justify-between"
+          >
             <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">
               Auto-sync
             </div>
@@ -580,10 +687,21 @@ export default function LandingPage() {
                 Automatic refresh keeps your portfolio up to date.
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Large card: customization */}
-          <div className="md:col-span-2 rounded-2xl border border-border bg-card p-8 shadow-card">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 22,
+              delay: 0.06,
+            }}
+            className="md:col-span-2 rounded-2xl border border-border bg-card p-8 shadow-card"
+          >
             <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-5">
               Customization
             </div>
@@ -613,7 +731,7 @@ export default function LandingPage() {
                 </span>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -623,7 +741,7 @@ export default function LandingPage() {
         aria-labelledby="pricing-heading"
         className="max-w-6xl mx-auto px-4 sm:px-6 pb-24"
       >
-        <div className="mb-14">
+        <Reveal className="mb-14">
           <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
             Pricing
           </div>
@@ -633,47 +751,66 @@ export default function LandingPage() {
           >
             Simple, honest pricing.
           </h2>
-        </div>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 gap-5 max-w-3xl">
-          <PricingCard
-            tier="Free"
-            eyebrow="Forever free"
-            price="$0"
-            period="/ forever"
-            features={[
-              { text: "Public portfolio page", included: true },
-              { text: "Auto-sync every 8 hours", included: true },
-              { text: "username.initmyfolio.com", included: true },
-              { text: "All repos, languages, stats", included: true },
-              { text: "SEO + Open Graph", included: true },
-              { text: "Custom domain", included: false },
-              { text: "Custom themes & layouts", included: false },
-            ]}
-            cta="Start free"
-            href="/login"
-          />
-          <PricingCard
-            tier="Pro"
-            eyebrow="For serious portfolios"
-            price="$7"
-            period="/ month"
-            features={[
-              { text: "Everything in Free", included: true },
-              { text: "Custom domain support", included: true },
-              { text: "Priority sync (1h)", included: true },
-              { text: "Custom themes + layouts", included: true },
-              { text: "Analytics dashboard", included: true },
-              { text: "Pin and reorder sections", included: true },
-              { text: "Remove InitMyFolio branding", included: true },
-            ]}
-            cta="Upgrade — $7/mo"
-            href="/login"
-            highlighted
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+          >
+            <PricingCard
+              tier="Free"
+              eyebrow="Forever free"
+              price="$0"
+              period="/ forever"
+              features={[
+                { text: "Public portfolio page", included: true },
+                { text: "Auto-sync every 8 hours", included: true },
+                { text: "username.initmyfolio.com", included: true },
+                { text: "All repos, languages, stats", included: true },
+                { text: "SEO + Open Graph", included: true },
+                { text: "Custom domain", included: false },
+                { text: "Custom themes & layouts", included: false },
+              ]}
+              cta="Start free"
+              href="/login"
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 22,
+              delay: 0.1,
+            }}
+          >
+            <PricingCard
+              tier="Pro"
+              eyebrow="For serious portfolios"
+              price="$7"
+              period="/ month"
+              features={[
+                { text: "Everything in Free", included: true },
+                { text: "Custom domain support", included: true },
+                { text: "Priority sync (1h)", included: true },
+                { text: "Custom themes + layouts", included: true },
+                { text: "Analytics dashboard", included: true },
+                { text: "Pin and reorder sections", included: true },
+                { text: "Remove InitMyFolio branding", included: true },
+              ]}
+              cta="Upgrade — $7/mo"
+              href="/login"
+              highlighted
+            />
+          </motion.div>
         </div>
 
-        <div className="mt-5 max-w-3xl">
+        <Reveal delay={0.1} className="mt-5 max-w-3xl">
           <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/15">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
             <span className="text-sm text-primary/80 font-medium">
@@ -681,37 +818,39 @@ export default function LandingPage() {
               launch.
             </span>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-24">
-        <div className="rounded-2xl border border-border bg-card p-10 md:p-16 shadow-card">
-          <div className="grid md:grid-cols-[1fr_auto] items-center gap-8">
-            <div>
-              <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
-                Ready?
+        <Reveal>
+          <div className="rounded-2xl border border-border bg-card p-10 md:p-16 shadow-card">
+            <div className="grid md:grid-cols-[1fr_auto] items-center gap-8">
+              <div>
+                <div className="text-xs font-mono uppercase tracking-widest text-primary/70 mb-3">
+                  Ready?
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-3">
+                  Live in 30 seconds.
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  No credit card. No configuration. Just GitHub.
+                </p>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-3">
-                Live in 30 seconds.
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                No credit card. No configuration. Just GitHub.
-              </p>
+              <Link
+                href="/login"
+                className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all duration-200 active:scale-[0.97] shadow-[0_2px_12px_hsl(var(--primary)/0.35)] group whitespace-nowrap"
+              >
+                <GithubLogo weight="bold" className="w-4 h-4" />
+                Create portfolio
+                <ArrowRight
+                  weight="bold"
+                  className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
+                />
+              </Link>
             </div>
-            <Link
-              href="/login"
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all duration-200 active:scale-[0.97] shadow-[0_2px_12px_hsl(var(--primary)/0.35)] group whitespace-nowrap"
-            >
-              <GithubLogo weight="bold" className="w-4 h-4" />
-              Create portfolio
-              <ArrowRight
-                weight="bold"
-                className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-              />
-            </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────── */}
