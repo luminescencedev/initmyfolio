@@ -761,6 +761,7 @@ export default async function PortfolioPage({ params }: Props) {
                     width={64}
                     height={64}
                     className="rounded-2xl ring-2 ring-white/50 dark:ring-white/10 shrink-0"
+                    priority
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -1174,6 +1175,7 @@ export default async function PortfolioPage({ params }: Props) {
                       width={32}
                       height={32}
                       className="rounded-full border border-border shrink-0"
+                      priority
                     />
                   )}
                   <div className="flex flex-col gap-1.5">

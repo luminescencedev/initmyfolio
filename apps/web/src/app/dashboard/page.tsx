@@ -311,6 +311,7 @@ function DashboardContent() {
                 width={40}
                 height={40}
                 className="rounded-full border border-border shrink-0"
+                priority
               />
             ) : (
               <div className="w-10 h-10 rounded-full border border-border bg-secondary flex items-center justify-center shrink-0">
@@ -435,6 +436,7 @@ function DashboardContent() {
                 width={28}
                 height={28}
                 className="rounded-full border border-border shrink-0"
+                priority
               />
             ) : null}
             <span className="text-sm font-semibold text-foreground truncate">
